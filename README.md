@@ -43,7 +43,14 @@ npm start          # http://localhost:8000
 ```
 
 L'application est un site statique : aucun serveur applicatif, aucune base de données.
-Le dossier entier se déploie tel quel sur n'importe quel hébergement statique.
+`npm run build` rassemble les fichiers livrés dans `public/` (sans les sources, les outils
+ni `node_modules`) : c'est ce dossier qu'on publie.
+
+### Déploiement sur Vercel
+
+Aucune configuration : Vercel lance `npm run build` et sert `public/`, son dossier par défaut.
+Les prix étant datés au moment du build, **chaque déploiement remet les relevés au vert** ;
+sans nouveau déploiement, ils passent en orange au bout de 7 jours.
 
 > La géolocalisation et le service worker exigent **HTTPS** en production
 > (`localhost` est toléré en développement).
@@ -57,6 +64,7 @@ Le dossier entier se déploie tel quel sur n'importe quel hébergement statique.
 | `npm test` | Lance les 64 tests : règles métier, contributions, géolocalisation |
 | `npm run css` | Compile `src/styles.css` en `css/style.css` (Tailwind CSS v4, minifié) |
 | `npm run version` | Estampille `sw.js` avec l'empreinte des fichiers, pour forcer la mise à jour du cache |
+| `npm run publier` | Copie les fichiers livrés dans `public/`, le dossier servi en production |
 | `npm run build` | Enchaîne tout ce qui précède ; s'arrête à la première erreur |
 | `npm start` | Serveur local sur le port 8000 |
 
@@ -86,7 +94,8 @@ zando-prix/
 ├── fonts/                Plus Jakarta Sans + licence OFL
 ├── icones/               Icônes de l'application
 ├── vendor/leaflet/       Leaflet 1.9.4, hébergé avec l'application
-└── outils/               Générateur de données, validateur, tests, scripts d'images
+├── outils/               Générateur de données, validateur, tests, publication, scripts d'images
+└── public/               Site publié (généré par npm run build, non versionné)
 ```
 
 ## Règles métier

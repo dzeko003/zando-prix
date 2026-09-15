@@ -9,7 +9,8 @@
     "test": "node outils/test-regles.js && node outils/test-contributions.js && node outils/test-geo.js",
     "start": "python3 -m http.server 8000",
     "version": "node outils/version-sw.js",
-    "build": "npm run donnees && npm run valider && npm test && npm run css && npm run version",
+    "publier": "node outils/publier.js",
+    "build": "npm run donnees && npm run valider && npm test && npm run css && npm run version && npm run publier",
     "css": "tailwindcss -i src/styles.css -o css/style.css --minify"
   },
   "devDependencies": {
