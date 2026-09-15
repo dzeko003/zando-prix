@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zando Prix — prix des marchés de Brazzaville</title>
+<meta name="description" content="Ce qu'on annonce aujourd'hui sur les marchés Total, Poto-Poto, Moungali et Ouenzé, avant marchandage.">
+<meta name="theme-color" content="#F4F6F5">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icones/app-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icones/app-192.png">
+<link rel="preload" href="fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-dvh">
+
+<!-- Icônes Lucide (licence ISC), sous-ensemble réellement employé. -->
+<svg xmlns="http://www.w3.org/2000/svg" hidden aria-hidden="true">
+  <symbol id="i-maison" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></symbol>
+  <symbol id="i-carte" viewBox="0 0 24 24"><path d="M14.1 5.55a2 2 0 0 0 1.8 0l3.66-1.83A1 1 0 0 1 21 4.62v12.76a1 1 0 0 1-.55.9l-4.55 2.27a2 2 0 0 1-1.8 0l-4.2-2.1a2 2 0 0 0-1.8 0l-3.66 1.83A1 1 0 0 1 3 19.38V6.62a1 1 0 0 1 .55-.9L8.1 3.45a2 2 0 0 1 1.8 0Z"/><path d="M15 5.76v15"/><path d="M9 3.24v15"/></symbol>
+  <symbol id="i-liste" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
+  <symbol id="i-marche" viewBox="0 0 24 24"><path d="m2 7 4.4-4.4A2 2 0 0 1 7.8 2h8.4a2 2 0 0 1 1.4.6L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></symbol>
+  <symbol id="i-recherche" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-filtre" viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></symbol>
+  <symbol id="i-retour" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-aller" viewBox="0 0 24 24"><path d="M3 11 22 2l-9 19-2-8-8-2Z"/></symbol>
+  <symbol id="i-position" viewBox="0 0 24 24"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-horloge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-etiquette" viewBox="0 0 24 24"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z"/><circle cx="7.5" cy="7.5" r=".5"/></symbol>
+  <symbol id="i-alerte" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-question" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-moins" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-croix" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-viseur" viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M12 2v3M12 19v3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-coche" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-chevron-bas" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-hors-ligne" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 14 0"/><path d="m2 2 20 20"/></symbol>
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h11"/><path d="M4 17h6"/></symbol>
+</svg>
+
+<p id="hors-ligne" hidden
+   class="fixed inset-x-4 top-[calc(env(safe-area-inset-top)+10px)] md:top-20 z-[1200] mx-auto flex w-fit items-center gap-2 rounded-full bg-encre px-4 py-2 text-[0.78rem] font-semibold text-white shadow-nav">
+  <svg class="ic size-4" aria-hidden="true"><use href="#i-hors-ligne"/></svg>
+  Hors connexion — derniers prix connus
+</p>
+
+<!-- Barre du haut, écrans larges : remplace la barre flottante du bas. -->
+<header id="barre" hidden class="sticky top-0 z-[1100] hidden bg-fond/85 backdrop-blur-md md:block">
+  <div class="mx-auto flex h-18 max-w-6xl items-center gap-6 px-6 lg:px-10">
+    <a href="#/" class="flex shrink-0 items-center gap-2.5" aria-label="Zando Prix, accueil">
+      <span class="grid size-10 place-items-center rounded-full bg-foret text-vert-300"><svg class="ic size-5" aria-hidden="true"><use href="#i-logo"/></svg></span>
+      <span class="text-[1.12rem] font-bold tracking-tight">Zando Prix</span>
+    </a>
+    <nav data-nav aria-label="Navigation principale" class="flex items-center gap-1.5 rounded-full bg-nav p-1.5 ring-1 ring-black/5">
+      <a href="#/" data-route="accueil" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-maison"/></svg>Accueil</a>
+      <a href="#/carte" data-route="carte" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-carte"/></svg>Carte</a>
+      <a href="#/mes-prix" data-route="mes-prix" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-liste"/></svg>Mes prix</a>
+      <a href="#/mon-marche" data-route="mon-marche" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-marche"/></svg>Point de départ</a>
+    </nav>
+    <a href="#/mon-marche" class="ml-auto flex h-10 min-w-0 items-center gap-2 rounded-full bg-white px-4 text-[0.86rem] font-medium ring-1 ring-black/5">
+      <svg class="ic size-[18px] shrink-0 text-vert-600" aria-hidden="true"><use href="#i-position"/></svg><span id="barre-depart" class="truncate">Choisir mon point de départ</span></a>
+  </div>
+</header>
+
+<div id="chargement" class="grid min-h-dvh place-items-center text-[0.9rem] font-medium text-gris">Chargement des prix…</div>
+
+<div id="erreur" hidden class="grid min-h-dvh place-items-center px-6">
+  <div class="carte max-w-sm p-6 text-center">
+    <p class="titre-section">Les prix sont indisponibles pour le moment.</p>
+    <p class="mt-2 text-[0.84rem] leading-relaxed text-gris">Vérifiez votre connexion et réessayez dans un instant.</p>
+    <button type="button" onclick="location.reload()"
+            class="mt-5 h-12 rounded-full bg-vert-500 px-7 text-[0.92rem] font-semibold text-encre">Réessayer</button>
+  </div>
+</div>
+
+<main id="app" hidden class="mx-auto max-w-[480px] pb-28 md:max-w-6xl md:px-6 md:pb-14 lg:px-10">
+  <div id="vue"></div>
+</main>
+
+<p id="banniere-date" hidden
+   class="fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+88px)] md:bottom-6 z-[1100] mx-auto w-fit rounded-full bg-ocre-pale px-4 py-2 text-[0.74rem] font-semibold text-ocre shadow-carte"></p>
+
+<nav id="nav" data-nav hidden aria-label="Navigation principale"
+     class="md:hidden fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+12px)] z-[1100] mx-auto flex w-fit items-center gap-2 rounded-full bg-nav/95 p-2 shadow-nav ring-1 ring-black/5 backdrop-blur">
+  <a href="#/" data-route="accueil" aria-label="Accueil" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+    <svg class="ic size-5" aria-hidden="true"><use href="#i-maison"/></svg></a>
+  <a href="#/carte" data-route="carte" aria-label="Carte des marchés" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+    <svg class="ic size-5" aria-hidden="true"><use href="#i-carte"/></svg></a>
+  <a href="#/mes-prix" data-route="mes-prix" aria-label="Mes prix proposés" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+    <svg class="ic size-5" aria-hidden="true"><use href="#i-liste"/></svg></a>
+  <a href="#/mon-marche" data-route="mon-marche" aria-label="Mon point de départ" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+    <svg class="ic size-5" aria-hidden="true"><use href="#i-marche"/></svg></a>
+</nav>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

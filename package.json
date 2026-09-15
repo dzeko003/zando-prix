@@ -1,0 +1,22 @@
+{
+  "name": "zando-prix",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "donnees": "node outils/generer-donnees.js",
+    "valider": "node outils/valider.js data/prix.json",
+    "test": "node outils/test-regles.js && node outils/test-contributions.js && node outils/test-geo.js",
+    "start": "python3 -m http.server 8000",
+    "version": "node outils/version-sw.js",
+    "build": "npm run donnees && npm run valider && npm test && npm run css && npm run version",
+    "css": "tailwindcss -i src/styles.css -o css/style.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  }
+}

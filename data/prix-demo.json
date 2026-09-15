@@ -1,0 +1,523 @@
+{
+  "meta": {
+    "genere_le": "2026-09-15",
+    "seuil_deplacement_fcfa": 2000,
+    "trajets": {
+      "moungali|ouenze": 2000,
+      "moungali|poto-poto": 2000,
+      "moungali|total": 2500,
+      "ouenze|poto-poto": 2000,
+      "ouenze|total": 3000,
+      "poto-poto|total": 2500
+    },
+    "source_prix": "jeu de recette — dates choisies pour exercer toutes les branches des règles R6 et R9",
+    "source_positions": "OpenStreetMap (© contributeurs OpenStreetMap, ODbL) ; Ouenzé = Marché Soukissa, à confirmer sur place",
+    "note_biais": "Relevés en début de mois, juste après les salaires : les écarts entre marchés sont probablement plus faibles qu'en fin de mois.",
+    "usage": "recette et démonstration de la péremption ; ne jamais servir comme fichier de production"
+  },
+  "marches": [
+    {
+      "id": "total",
+      "nom": "Marché Total",
+      "nom_court": "Total",
+      "arrondissement": "Bacongo (2ᵉ)",
+      "position": {
+        "lat": -4.28957,
+        "lon": 15.24923
+      }
+    },
+    {
+      "id": "poto-poto",
+      "nom": "Marché de Poto-Poto",
+      "nom_court": "Poto",
+      "arrondissement": "Poto-Poto (3ᵉ)",
+      "position": {
+        "lat": -4.26314,
+        "lon": 15.28621
+      }
+    },
+    {
+      "id": "moungali",
+      "nom": "Marché de Moungali (Texaco)",
+      "nom_court": "Moungali",
+      "arrondissement": "Moungali (4ᵉ)",
+      "position": {
+        "lat": -4.25833,
+        "lon": 15.27896
+      }
+    },
+    {
+      "id": "ouenze",
+      "nom": "Marché de Ouenzé",
+      "nom_court": "Ouenzé",
+      "arrondissement": "Ouenzé (5ᵉ)",
+      "position": {
+        "lat": -4.2335,
+        "lon": 15.27478
+      }
+    }
+  ],
+  "produits": [
+    {
+      "id": "riz-sac",
+      "nom": "Riz importé (sac)",
+      "unite_reference": "Sac de 25 kg",
+      "maniere_de_vendre": "quantite_scellee",
+      "segment": "gros",
+      "autres_noms": [
+        "riz",
+        "loso",
+        "sac de riz",
+        "riz importé"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 22500,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-15"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 21500,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-15"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 19500,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-15"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 20000,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-15"
+        }
+      }
+    },
+    {
+      "id": "riz-detail",
+      "nom": "Riz au détail",
+      "unite_reference": "Mesure — boîte de tomate, rase",
+      "maniere_de_vendre": "mesure",
+      "segment": "detail",
+      "autres_noms": [
+        "riz",
+        "loso",
+        "riz à la mesure"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 500,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-14"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 500,
+          "mot_vendeuse": "boîte",
+          "date": "2026-09-14"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 475,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-14"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 450,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-14"
+        }
+      }
+    },
+    {
+      "id": "foufou",
+      "nom": "Foufou",
+      "unite_reference": "Mesure — boîte de tomate, rase",
+      "maniere_de_vendre": "mesure",
+      "segment": "detail",
+      "autres_noms": [
+        "fufu",
+        "farine de manioc",
+        "poudre de manioc",
+        "manioc"
+      ],
+      "releves": {
+        "total": {
+          "statut": "pas_vu",
+          "date": "2026-09-12"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 400,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-12"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 375,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-12"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 400,
+          "mot_vendeuse": "boîte",
+          "date": "2026-09-12"
+        }
+      }
+    },
+    {
+      "id": "haricot",
+      "nom": "Haricot",
+      "unite_reference": "Mesure — boîte de tomate, rase",
+      "maniere_de_vendre": "mesure",
+      "segment": "detail",
+      "autres_noms": [
+        "madesu",
+        "madezu",
+        "haricots",
+        "niébé"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 750,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-06"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 800,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-06"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 725,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-06"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 700,
+          "mot_vendeuse": "mesure",
+          "date": "2026-09-06"
+        }
+      }
+    },
+    {
+      "id": "sucre",
+      "nom": "Sucre",
+      "unite_reference": "Paquet scellé de 1 kg",
+      "maniere_de_vendre": "quantite_scellee",
+      "segment": "detail",
+      "autres_noms": [
+        "sukali",
+        "sucre en poudre",
+        "paquet de sucre",
+        "SARIS"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 1100,
+          "mot_vendeuse": "paquet",
+          "date": "2026-08-26"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 1050,
+          "mot_vendeuse": "paquet",
+          "date": "2026-08-26"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 1000,
+          "mot_vendeuse": "paquet",
+          "date": "2026-08-26"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 1000,
+          "mot_vendeuse": "paquet",
+          "date": "2026-08-26"
+        }
+      }
+    },
+    {
+      "id": "huile",
+      "nom": "Huile végétale",
+      "unite_reference": "Bouteille scellée de 1 L",
+      "maniere_de_vendre": "quantite_scellee",
+      "segment": "detail",
+      "autres_noms": [
+        "mafuta",
+        "huile",
+        "bouteille d'huile"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 1900,
+          "mot_vendeuse": "bouteille",
+          "date": "2026-09-15"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 1850,
+          "mot_vendeuse": "bouteille",
+          "date": "2026-09-15"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 1800,
+          "mot_vendeuse": "bouteille",
+          "date": "2026-08-26"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 1750,
+          "mot_vendeuse": "bouteille",
+          "date": "2026-08-26"
+        }
+      }
+    },
+    {
+      "id": "oeufs",
+      "nom": "Œufs",
+      "unite_reference": "Plateau de 30",
+      "maniere_de_vendre": "quantite_scellee",
+      "segment": "gros",
+      "autres_noms": [
+        "maki",
+        "plateau d'œufs",
+        "alvéole"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 3600,
+          "mot_vendeuse": "plateau",
+          "date": "2026-09-13"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 3500,
+          "mot_vendeuse": "plateau",
+          "date": "2026-09-13"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 3300,
+          "mot_vendeuse": "plateau",
+          "date": "2026-09-13"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 3300,
+          "mot_vendeuse": "plateau",
+          "date": "2026-09-13"
+        }
+      }
+    },
+    {
+      "id": "mpiodi-carton",
+      "nom": "Mpiodi (carton)",
+      "unite_reference": "Carton entier, poids annoncé noté",
+      "maniere_de_vendre": "quantite_scellee",
+      "segment": "gros",
+      "autres_noms": [
+        "chinchard",
+        "poisson chinchard",
+        "carton de poisson"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 32000,
+          "mot_vendeuse": "carton",
+          "date": "2026-09-14"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 31000,
+          "mot_vendeuse": "carton",
+          "date": "2026-09-05"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 29500,
+          "mot_vendeuse": "carton",
+          "date": "2026-09-05"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 28500,
+          "mot_vendeuse": "carton",
+          "date": "2026-09-05"
+        }
+      }
+    },
+    {
+      "id": "mpiodi-detail",
+      "nom": "Mpiodi au détail",
+      "unite_reference": "Tas, nombre de pièces noté",
+      "maniere_de_vendre": "format_variable",
+      "segment": "detail",
+      "autres_noms": [
+        "chinchard",
+        "poisson",
+        "tas de poisson"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 1500,
+          "mot_vendeuse": "tas",
+          "date": "2026-09-13"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 1500,
+          "mot_vendeuse": "tas",
+          "date": "2026-09-13"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 1250,
+          "mot_vendeuse": "tas",
+          "date": "2026-09-13"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 1250,
+          "mot_vendeuse": "tas",
+          "date": "2026-09-17"
+        }
+      }
+    },
+    {
+      "id": "kwanga",
+      "nom": "Kwanga",
+      "unite_reference": "Bâton, format courant décrit",
+      "maniere_de_vendre": "format_variable",
+      "segment": "detail",
+      "autres_noms": [
+        "chikwangue",
+        "chikwang",
+        "bâton de manioc",
+        "manioc"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 700,
+          "mot_vendeuse": "bâton",
+          "date": "2026-09-13"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 700,
+          "mot_vendeuse": "bâton",
+          "date": "2026-09-13"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 600,
+          "mot_vendeuse": "bâton",
+          "date": "2026-09-13"
+        },
+        "ouenze": {
+          "statut": "releve",
+          "prix": 600,
+          "mot_vendeuse": "bâton",
+          "date": "2026-09-13"
+        }
+      }
+    },
+    {
+      "id": "saka-saka",
+      "nom": "Saka-saka pilé",
+      "unite_reference": "Boule ou sachet, format décrit",
+      "maniere_de_vendre": "format_variable",
+      "segment": "detail",
+      "autres_noms": [
+        "saka saka",
+        "sakasaka",
+        "feuilles de manioc",
+        "pondu",
+        "mpondu"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 400,
+          "mot_vendeuse": "boule",
+          "date": "2026-09-13"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 350,
+          "mot_vendeuse": "sachet",
+          "date": "2026-09-13"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 350,
+          "mot_vendeuse": "boule",
+          "date": "2026-09-13"
+        },
+        "ouenze": {
+          "statut": "pas_vu",
+          "date": "2026-09-13"
+        }
+      }
+    },
+    {
+      "id": "charbon",
+      "nom": "Charbon de bois",
+      "unite_reference": "Sac ordinaire, hauteur et remplissage décrits",
+      "maniere_de_vendre": "format_variable",
+      "segment": "gros",
+      "autres_noms": [
+        "makala",
+        "charbon",
+        "braise",
+        "sac de makala"
+      ],
+      "releves": {
+        "total": {
+          "statut": "releve",
+          "prix": 4000,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-13"
+        },
+        "poto-poto": {
+          "statut": "releve",
+          "prix": 3800,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-13"
+        },
+        "moungali": {
+          "statut": "releve",
+          "prix": 2900,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-13"
+        },
+        "ouenze": {
+          "statut": "instable",
+          "prix_min": 2500,
+          "prix_max": 4200,
+          "mot_vendeuse": "sac",
+          "date": "2026-09-13"
+        }
+      }
+    }
+  ]
+}
