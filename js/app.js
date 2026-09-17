@@ -5,6 +5,10 @@ import {
 } from './regles.js';
 import { valider, ajouter, pourProduit, lire as toutesLesContributions } from './contributions.js';
 import { departComplet, definirMarcheDepart, invitationFermee, fermerInvitation } from './prefs.js';
+import {
+  lire as lirePanier, definir as definirPanier, quantite as quantitePanier,
+  vider as viderPanier, compte as comptePanier, evaluerPanier
+} from './panier.js';
 import { localiser, marcheLePlusProche, distanceKm, distanceLisible, MESSAGES, etatPermission, consignesActivation } from './geo.js';
 
 const metres = m => (m < 1000 ? `${Math.max(5, Math.round(m / 5) * 5)} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`);
@@ -324,29 +328,35 @@ async function preparerInvitation() {
     </div>`;
   el.hidden = false;
   el.querySelector('[data-invitation=fermer]').addEventListener('click', () => { fermerInvitation(); el.hidden = true; });
-  el.querySelector('[data-invitation=autoriser]').addEventListener('click', async e => {
-    const bouton = e.currentTarget;
-    bouton.disabled = true;
-    try {
-      const position = await obtenirPosition();
-      positionSession = position;
-      const proche = marcheLePlusProche(position, D.marches);
-      if (proche && position.precision <= PRECISION_SUFFISANTE) {
-        definirMarcheDepart(proche.marche.id, 'position', proche.km);
-        evaluerTout();
-        router();
-        return;
-      }
-      etat.messageDepart = proche
-        ? `Votre position n’est connue qu’à ± ${metres(position.precision)} : trop imprécis pour choisir à votre place. ` +
-          `Le plus proche serait le ${proche.marche.nom} — confirmez-le ci-dessous.`
-        : MESSAGES.loin;
-      location.hash = '#/mon-marche';
-    } catch (err) {
-      bouton.disabled = false;
-      if (err.message !== 'gere') { etat.messageDepart = MESSAGES[err.message] || MESSAGES.echec; location.hash = '#/mon-marche'; }
+  el.querySelector('[data-invitation=autoriser]').addEventListener('click', e => definirDepuisPosition(e.currentTarget));
+}
+
+/**
+ * Déduit le marché de départ de la position de l'appareil, à la demande.
+ * Partagé par l'invitation de l'accueil et par le panier : au-delà de ± 500 m,
+ * on ne choisit pas à la place de l'utilisateur, on lui demande de confirmer.
+ */
+async function definirDepuisPosition(bouton) {
+  bouton.disabled = true;
+  try {
+    const position = await obtenirPosition();
+    positionSession = position;
+    const proche = marcheLePlusProche(position, D.marches);
+    if (proche && position.precision <= PRECISION_SUFFISANTE) {
+      definirMarcheDepart(proche.marche.id, 'position', proche.km);
+      evaluerTout();
+      router();
+      return;
     }
-  });
+    etat.messageDepart = proche
+      ? `Votre position n’est connue qu’à ± ${metres(position.precision)} : trop imprécis pour choisir à votre place. ` +
+        `Le plus proche serait le ${proche.marche.nom} — confirmez-le ci-dessous.`
+      : MESSAGES.loin;
+    location.hash = '#/mon-marche';
+  } catch (err) {
+    bouton.disabled = false;
+    if (err.message !== 'gere') { etat.messageDepart = MESSAGES[err.message] || MESSAGES.echec; location.hash = '#/mon-marche'; }
+  }
 }
 
 /* --------------------------------------------------------------- navigation */
@@ -365,6 +375,8 @@ function router() {
     rendreProduit(vue, D.produits.find(p => p.id === param));
   } else if (route === 'carte') {
     actif = 'carte'; rendreCarte(vue, param);
+  } else if (route === 'panier') {
+    actif = 'panier'; rendrePanier(vue);
   } else if (route === 'mes-prix') {
     actif = 'mes-prix'; rendreMesPrix(vue);
   } else if (route === 'mon-marche') {
@@ -382,6 +394,7 @@ function router() {
     if (courant) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   majBarre();
+  majPanierNav();
   window.scrollTo(0, 0);
 }
 
@@ -409,7 +422,9 @@ function rendreAccueil(vue) {
   const stats = statistiques();
   const pluriel = valent.length > 1;
   const titre = valent.length
-    ? `${valent.length} produit${pluriel ? 's' : ''} sur ${D.produits.length} ${pluriel ? 'valent' : 'vaut'} le déplacement`
+    ? (depart
+        ? `${valent.length} produit${pluriel ? 's' : ''} sur ${D.produits.length} ${pluriel ? 'valent' : 'vaut'} le déplacement`
+        : `${valent.length} produit${pluriel ? 's' : ''} sur ${D.produits.length} avec un écart entre marchés`)
     : 'Aucun écart ne couvre le transport';
   const lieu = depart
     ? `Depuis ${depart.marche.nom_court}${depart.source === 'position' && depart.km != null ? ' · ' + distanceLisible(depart.km) : ''}`
@@ -454,7 +469,7 @@ function rendreAccueil(vue) {
   </section>
 
   <div id="filtres" class="flex gap-2 overflow-x-auto px-4 pt-4 [scrollbar-width:none] md:px-0" ${etat.filtre === 'tous' ? 'hidden' : ''}>
-    ${[['tous', 'Tous'], ['vaut', 'Vaut le déplacement'], ['gros', 'Gros'], ['detail', 'Détail']].map(([v, t]) =>
+    ${[['tous', 'Tous'], ['vaut', depart ? 'Vaut le déplacement' : 'Écart entre marchés'], ['gros', 'Gros'], ['detail', 'Détail']].map(([v, t]) =>
       `<button type="button" data-filtre="${v}" class="shrink-0 rounded-full px-4 py-2.5 text-[0.82rem] font-semibold ring-1 transition">${t}</button>`).join('')}
   </div>
 
@@ -462,7 +477,7 @@ function rendreAccueil(vue) {
     <div id="invitation-position" class="px-4 md:px-0 lg:col-span-12" hidden></div>
     <section id="bloc-vaut" class="lg:col-span-4">
       <div class="mb-3 flex items-center justify-between gap-3 px-4 md:px-0">
-        <h2 class="titre-section">Vaut le déplacement</h2>
+        <h2 class="titre-section">${depart ? 'Vaut le déplacement' : 'Écarts entre marchés'}</h2>
         <span class="flex items-center gap-3">
           ${valent.length ? `<button type="button" id="voir-vaut" class="voir-tout">Voir tout</button>` : ''}
           ${valent.length > 1 ? fleches('vaut') : ''}
@@ -670,6 +685,7 @@ function tuileMarche(m) {
 function carteVerdict(ev) {
   const e = ev.ecartUtile;
   let icone, pastille, titre, note, positif = false;
+  let chapeau = e.evaluable ? 'Verdict' : 'Écart non évaluable';
 
   if (!e.evaluable) {
     icone = 'question'; pastille = 'bg-nav text-gris';
@@ -683,10 +699,18 @@ function carteVerdict(ev) {
     const chiffres = e.depuis
       ? `Écart de ${fcfa(e.ecart)} depuis le ${e.depuis.nom} · aller-retour vers le ${e.marche.nom} : ${fcfa(e.seuil)}`
       : `Écart entre marchés de ${fcfa(e.ecart)} · aller-retour estimé à ${fcfa(e.seuil)}`;
-    if (e.vaut) {
+    if (e.vaut && !e.depuis) {
+      // Sans point de départ, l'écart mesuré est celui du marché le plus cher : conclure
+      // « ça vaut le déplacement » serait faux pour qui part déjà d'un marché bon marché.
+      // On constate l'écart, on ne recommande rien.
+      icone = 'etiquette'; pastille = 'bg-ocre-pale text-ocre';
+      chapeau = 'Écart constaté';
+      titre = `${fcfa(e.ecart)} d’écart entre les marchés`;
+      note = `Le moins cher est au ${esc(e.marche.nom)}. L’aller-retour coûte au moins ${fcfa(e.seuil)} : indiquez votre point de départ pour savoir si le déplacement vaut le coup.`;
+    } else if (e.vaut) {
       icone = 'aller'; pastille = 'bg-vert-500 text-encre'; positif = true;
       titre = 'Ça vaut le déplacement';
-      note = `${esc(chiffres)}.${e.depuis ? '' : ` Le moins cher est au ${esc(e.marche.nom)}.`}`;
+      note = `${esc(chiffres)}.`;
     } else {
       icone = 'maison'; pastille = 'bg-nav text-encre';
       titre = 'Ça ne vaut pas le déplacement';
@@ -703,7 +727,7 @@ function carteVerdict(ev) {
   return `<div class="carte flex gap-3.5 p-4 ${positif ? 'bg-vert-50 ring-vert-300' : ''}">
     <span class="grid size-11 shrink-0 place-items-center rounded-full ${pastille}">${ic(icone)}</span>
     <div class="min-w-0">
-      <p class="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-gris-clair">${e.evaluable ? 'Verdict' : 'Écart non évaluable'}</p>
+      <p class="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-gris-clair">${chapeau}</p>
       <p class="mt-0.5 text-[1.05rem] font-semibold leading-snug">${titre}</p>
       <p class="mt-1 text-[0.8rem] leading-relaxed text-gris">${note}</p>
       ${liens}
@@ -1047,6 +1071,221 @@ async function rendreCarte(vue, idProduit) {
     console.warn('[zando] carte :', err.message);
     message('La carte n’a pas pu se charger. Les marchés restent listés ci-dessous.');
   }
+}
+
+/* ------------------------------------------------------------------- panier */
+
+/** Pastille de la navigation : quantités cumulées. */
+function majPanierNav() {
+  const { articles } = comptePanier();
+  document.querySelectorAll('[data-panier-compte]').forEach(el => {
+    el.textContent = articles > 99 ? '99+' : String(articles);
+    el.hidden = articles === 0;
+  });
+}
+
+/* Choix des produits : le référentiel seul, sans aucun prix. Les prix n'apparaissent
+   qu'une fois le panier constitué, et seulement en total par marché. */
+function controleChoix(p) {
+  const q = quantitePanier(p.id);
+  if (!q) {
+    return `<button type="button" data-produit="${esc(p.id)}" data-pas="1" aria-label="Ajouter ${esc(p.nom)} au panier"
+      class="grid size-11 shrink-0 place-items-center rounded-full bg-nav text-encre transition active:scale-95">${ic('plus')}</button>`;
+  }
+  return `<div class="flex shrink-0 items-center gap-1 rounded-full bg-nav p-1">
+      <button type="button" data-produit="${esc(p.id)}" data-pas="-1" aria-label="Retirer une unité de ${esc(p.nom)}"
+              class="grid size-9 place-items-center rounded-full bg-white text-encre transition active:scale-95">${ic('moins', 'size-4')}</button>
+      <span class="min-w-7 text-center text-[0.9rem] font-semibold tabular-nums">${q}</span>
+      <button type="button" data-produit="${esc(p.id)}" data-pas="1" aria-label="Ajouter une unité de ${esc(p.nom)}"
+              class="grid size-9 place-items-center rounded-full bg-white text-encre transition active:scale-95">${ic('plus', 'size-4')}</button>
+    </div>`;
+}
+
+function choixProduits() {
+  return `<section>
+    <div class="mb-3 flex items-end justify-between">
+      <h2 class="titre-section">Choisir mes produits</h2>
+      <span class="voir-tout">quantité à l’unité de référence</span>
+    </div>
+    <div class="carte divide-y divide-trait px-3">
+      ${D.produits.map(p => `<div class="flex items-center gap-2.5 py-2.5" data-ligne="${esc(p.id)}">
+        <img src="images/produits/${esc(p.id)}-vignette.webp" alt="" width="88" height="88" loading="lazy" decoding="async"
+             class="size-11 shrink-0 rounded-xl bg-vert-100 object-cover">
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-[0.88rem] font-semibold">${esc(p.nom)}</p>
+          <p class="mt-0.5 truncate text-[0.71rem] text-gris">${esc(p.unite_reference)}</p>
+        </div>
+        <span data-controle>${controleChoix(p)}</span>
+      </div>`).join('')}
+    </div>
+    <p class="mt-3 px-1 text-[0.74rem] leading-relaxed text-gris">
+      Les quantités portent sur l’unité de référence de chaque produit — 4 = quatre sacs de 25 kg.
+      Aucun prix au kilo, aucune conversion.</p>
+  </section>`;
+}
+
+/* D'où l'utilisateur part : sans cette réponse, aucune économie nette n'est calculable. */
+function blocDepartPanier(depart) {
+  if (depart) {
+    return `<p class="flex flex-wrap items-center gap-x-2 gap-y-1 px-1 text-[0.8rem] text-gris">
+      ${ic('position', 'size-4 text-vert-600')} Départ : <b class="font-semibold text-encre">${esc(depart.marche.nom)}</b>
+      <a href="#/mon-marche" class="font-semibold text-vert-700 hover:underline">changer</a></p>`;
+  }
+  return `<div class="carte flex flex-col gap-3.5 p-4 sm:flex-row sm:items-center">
+    <span class="grid size-11 shrink-0 place-items-center rounded-full bg-vert-500 text-encre">${ic('viseur')}</span>
+    <div class="min-w-0 flex-1">
+      <p class="text-[0.95rem] font-semibold leading-snug">D’où partez-vous ?</p>
+      <p class="mt-1 text-[0.79rem] leading-relaxed text-gris">Sans point de départ, l’application ne peut pas déduire le prix du taxi de l’économie.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 sm:shrink-0">
+      <button type="button" id="position-panier" class="h-11 rounded-full bg-vert-500 px-4 text-[0.86rem] font-semibold text-encre disabled:opacity-60">Utiliser ma position</button>
+      <a href="#/mon-marche" class="inline-flex h-11 items-center rounded-full bg-nav px-4 text-[0.84rem] font-semibold">Choisir moi-même</a>
+    </div>
+  </div>`;
+}
+
+/* Le verdict du panier reprend R4 : un déplacement n'est recommandé que si l'économie
+   dépasse le prix de l'aller-retour. Sans point de départ, on constate sans recommander. */
+function verdictPanier(r, depart) {
+  const v = r.verdict;
+  let icone = 'question', pastille = 'bg-nav text-gris', chapeau = 'Verdict', titre, note, positif = false;
+
+  if (v.type === 'vide') {
+    icone = 'panier'; chapeau = 'Panier vide';
+    titre = 'Choisissez vos produits ci-dessus';
+    note = 'Dès le premier produit, Zando Prix compare le total sur les quatre marchés et dit lequel vaut le déplacement.';
+  } else if (v.type === 'aucun-complet') {
+    icone = 'alerte'; pastille = 'bg-ocre-pale text-ocre'; chapeau = 'Comparaison impossible';
+    titre = 'Aucun marché ne fournit tout le panier';
+    note = 'Dans chaque marché, au moins un produit du panier n’a pas de prix utilisable. Retirez-le pour pouvoir comparer.';
+  } else if (v.type === 'depart-incomplet') {
+    icone = 'alerte'; pastille = 'bg-ocre-pale text-ocre'; chapeau = 'Comparaison impossible depuis votre marché';
+    titre = `Le panier entier n’est pas relevé au ${esc(depart.marche.nom)}`;
+    note = `Impossible de dire ce que vous économiseriez en bougeant. Le total le plus bas est de ${fcfa(v.meilleur.total)} au ${esc(v.meilleur.marche.nom)}.`;
+  } else if (v.type === 'classement') {
+    icone = 'etiquette'; pastille = 'bg-ocre-pale text-ocre'; chapeau = 'Total le plus bas';
+    titre = `${fcfa(v.meilleur.total)} au ${esc(v.meilleur.marche.nom)}`;
+    note = 'Indiquez votre point de départ : le prix de l’aller-retour se déduit de l’économie, et le verdict change selon le marché d’où vous partez.';
+  } else if (v.type === 'sur-place') {
+    icone = 'maison'; pastille = 'bg-vert-500 text-encre'; positif = true;
+    titre = 'C’est ici le moins cher';
+    note = `Le panier coûte ${fcfa(v.meilleur.total)} au ${esc(v.meilleur.marche.nom)} : aucun autre marché ne fait mieux sur ce panier.`;
+  } else if (v.type === 'vaut') {
+    icone = 'aller'; pastille = 'bg-vert-500 text-encre'; positif = true;
+    titre = `Allez au ${esc(v.meilleur.marche.nom)}`;
+    note = `${fcfa(v.mien.total)} au ${esc(v.mien.marche.nom)} contre ${fcfa(v.meilleur.total)} là-bas : ${fcfa(v.ecart)} d’écart, moins ${fcfa(v.trajet)} d’aller-retour. Vous gagnez ${fcfa(v.net)}.`;
+  } else {
+    icone = 'maison'; pastille = 'bg-nav text-encre';
+    titre = `Restez au ${esc(v.mien.marche.nom)}`;
+    note = `Le panier est moins cher de ${fcfa(v.ecart)} au ${esc(v.meilleur.marche.nom)}, mais l’aller-retour coûte ${fcfa(v.trajet)} : le déplacement ${v.net === 0 ? 'ne vous rapporterait rien' : `vous coûterait ${fcfa(-v.net)}`}.`;
+  }
+
+  return `<div class="carte flex gap-3.5 p-4 ${positif ? 'bg-vert-50 ring-vert-300' : ''}">
+    <span class="grid size-11 shrink-0 place-items-center rounded-full ${pastille}">${ic(icone)}</span>
+    <div class="min-w-0">
+      <p class="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-gris-clair">${chapeau}</p>
+      <p class="mt-0.5 text-[1.05rem] font-semibold leading-snug">${titre}</p>
+      <p class="mt-1 text-[0.8rem] leading-relaxed text-gris">${note}</p>
+      ${r.aVerifier ? `<p class="mt-1.5 text-[0.76rem] font-medium leading-relaxed text-ocre">Certains prix de ce panier ont plus de 7 jours : à vérifier sur place.</p>` : ''}
+      <p class="mt-2.5"><a href="#/calcul" class="inline-flex items-center gap-1 text-[0.8rem] font-semibold text-gris hover:text-encre">${ic('question', 'size-4')} Comment c’est calculé</a></p>
+    </div>
+  </div>`;
+}
+
+function classementPanier(r) {
+  const meilleur = r.complets[0];
+  return `<section>
+    <div class="mb-3 flex items-end justify-between">
+      <h2 class="titre-section">Le panier marché par marché</h2>
+      <span class="voir-tout">${r.complets.length} marché${r.complets.length > 1 ? 's' : ''} sur ${D.marches.length}</span>
+    </div>
+    <div class="carte divide-y divide-trait px-3">
+      ${r.complets.map((c, i) => `<div class="flex items-center gap-3 py-3">
+        <img src="images/marches/${esc(c.marche.id)}-vignette.webp" alt="" width="88" height="88" loading="lazy" decoding="async"
+             class="size-11 shrink-0 rounded-xl bg-vert-100 object-cover">
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-[0.9rem] font-semibold">${esc(c.marche.nom)}</p>
+          <p class="mt-0.5 truncate text-[0.72rem] text-gris">${i === 0
+            ? 'le panier le moins cher'
+            : `+ ${fcfa(c.total - meilleur.total)} par rapport au ${esc(meilleur.marche.nom_court || meilleur.marche.nom)}`}${
+            c.aVerifier ? ` · ${c.aVerifier} prix à vérifier` : ''}</p>
+        </div>
+        <span class="shrink-0 whitespace-nowrap text-[0.92rem] font-semibold tabular-nums ${i === 0 ? 'rounded-full bg-vert-500 px-2.5 py-1 text-encre' : ''}">${fcfa(c.total)}</span>
+      </div>`).join('')}
+    </div>
+    <p class="mt-3 px-1 text-[0.74rem] leading-relaxed text-gris">
+      Totaux des prix annoncés, avant marchandage, relevés sur place.</p>
+  </section>`;
+}
+
+function incompletsPanier(r) {
+  return `<section>
+    <h2 class="titre-section mb-3">Marchés écartés</h2>
+    <div class="carte divide-y divide-trait px-3">
+      ${r.incomplets.map(i => `<div class="py-3">
+        <p class="text-[0.88rem] font-semibold">${esc(i.marche.nom)}</p>
+        <p class="mt-0.5 text-[0.74rem] leading-relaxed text-gris">${i.manquants.map(m => `${esc(m.produit.nom)} — ${esc(m.raison)}`).join(' · ')}</p>
+      </div>`).join('')}
+    </div>
+    <p class="mt-3 px-1 text-[0.74rem] leading-relaxed text-gris">
+      Un marché qui ne peut pas fournir tout le panier n’est pas classé : son total serait celui d’un panier plus petit.</p>
+  </section>`;
+}
+
+function resultatsPanier(depart) {
+  const r = evaluerPanier(lirePanier(), D.produits, D.marches, MAINTENANT, D.meta, depart ? depart.marche.id : null);
+  return `${verdictPanier(r, depart)}
+    ${r.complets.length ? classementPanier(r) : ''}
+    ${r.articles.length && r.incomplets.length ? incompletsPanier(r) : ''}`;
+}
+
+function rendrePanier(vue) {
+  const depart = departMarche();
+
+  vue.innerHTML = `
+  <header class="bg-gradient-to-b from-vert-100 to-fond px-4 pb-5 ${HAUT} md:mx-auto md:mt-4 md:max-w-2xl md:rounded-hero md:px-6 md:pt-6">
+    <div class="flex items-center gap-3">
+      <a href="#/" class="bouton-rond" aria-label="Retour">${ic('retour')}</a>
+      <h1 class="flex-1 text-center text-[1.1rem] font-semibold tracking-tight">Mon panier</h1>
+      <button type="button" id="vider-panier" class="bouton-rond" aria-label="Vider le panier" ${comptePanier().articles ? '' : 'hidden'}>${ic('croix')}</button>
+      <span class="size-11 shrink-0 ${comptePanier().articles ? 'hidden' : ''}"></span>
+    </div>
+    <p id="resume-panier" class="mx-auto mt-4 max-w-[36ch] text-center text-[0.8rem] leading-relaxed text-gris"></p>
+  </header>
+  <div class="space-y-6 px-4 pb-4 md:mx-auto md:max-w-2xl md:px-0">
+    ${blocDepartPanier(depart)}
+    ${choixProduits()}
+    <div id="resultats-panier" class="space-y-6"></div>
+  </div>`;
+
+  majResultats(depart);
+
+  vue.querySelector('#vider-panier').addEventListener('click', () => { viderPanier(); rendrePanier(vue); });
+
+  const position = vue.querySelector('#position-panier');
+  if (position) position.addEventListener('click', e => definirDepuisPosition(e.currentTarget));
+
+  vue.querySelector('[data-ligne]').parentElement.addEventListener('click', e => {
+    const b = e.target.closest('[data-produit][data-pas]');
+    if (!b) return;
+    const id = b.dataset.produit;
+    if (definirPanier(id, quantitePanier(id) + Number(b.dataset.pas)) === null) return;  // stockage bloqué
+    const produit = D.produits.find(p => p.id === id);
+    vue.querySelector(`[data-ligne="${CSS.escape(id)}"] [data-controle]`).innerHTML = controleChoix(produit);
+    majResultats(depart);
+  });
+}
+
+/* Le panier a changé : on ne recalcule que le résumé, le verdict et les totaux. */
+function majResultats(depart) {
+  const { lignes, articles } = comptePanier();
+  $('#resultats-panier').innerHTML = resultatsPanier(depart);
+  $('#resume-panier').textContent = articles
+    ? `${lignes} produit${lignes > 1 ? 's' : ''} · ${articles} article${articles > 1 ? 's' : ''} · prix annoncés avant marchandage`
+    : 'Choisissez des produits et leurs quantités : Zando Prix dira dans quel marché le panier revient le moins cher.';
+  const vider = $('#vider-panier');
+  if (vider) vider.hidden = articles === 0;
+  majPanierNav();
 }
 
 /* ----------------------------------------------------------------- mes prix */

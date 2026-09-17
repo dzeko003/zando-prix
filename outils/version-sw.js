@@ -13,7 +13,7 @@ import crypto from 'node:crypto';
 
 const SUIVIS = [
   'index.html', 'manifest.json', 'css/style.css',
-  'js/app.js', 'js/regles.js', 'js/contributions.js', 'js/prefs.js', 'js/geo.js', 'js/carte.js',
+  'js/app.js', 'js/regles.js', 'js/contributions.js', 'js/prefs.js', 'js/geo.js', 'js/carte.js', 'js/panier.js',
   'fonts/plus-jakarta-sans.woff2',
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
   'images/marche-total.webp',
