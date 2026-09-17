@@ -9,7 +9,7 @@
  * Les fonds de carte, d'un autre domaine, ne passent pas par ce cache.
  */
 
-const VERSION = 'zando-25dabce3f7';
+const VERSION = 'zando-5981cbfa6d';
 
 const PRODUITS = ['riz-sac', 'riz-detail', 'foufou', 'haricot', 'sucre', 'huile', 'oeufs',
                   'mpiodi-carton', 'mpiodi-detail', 'kwanga', 'saka-saka', 'charbon'];
