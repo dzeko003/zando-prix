@@ -27,6 +27,10 @@ fonctionne sans réseau et reste légère (moins de 300 Ko au premier écran).
 - **Carte des marchés** en lecture seule (Leaflet + OpenStreetMap), chargée à la demande. Aucun itinéraire.
 - **Recherche tolérante** : accents, tirets, majuscules ignorés ; noms locaux reconnus
   (*loso*, *madesu*, *makala*, *pondu*…).
+- **Panier** : un écran liste les 12 produits **sans leurs prix** ; on choisit les quantités,
+  comptées en unités de référence (4 = quatre sacs de 25 kg). L'application classe alors les
+  marchés par total du panier et dit si le déplacement se rembourse, taxi déduit depuis le
+  point de départ. Un marché qui ne fournit pas tout le panier est écarté du classement.
 - **Mes prix** : l'utilisateur propose un prix vu sur place, sans compte. La contribution
   reste sur son téléphone et n'entre jamais dans les comparaisons.
 - **Comment on calcule** : un écran explique les règles avec les chiffres du fichier en cours.
@@ -61,7 +65,7 @@ sans nouveau déploiement, ils passent en orange au bout de 7 jours.
 |---|---|
 | `npm run donnees` | Régénère `data/prix.json` et `data/prix-demo.json`, datés par rapport à aujourd'hui |
 | `npm run valider` | Vérifie `data/prix.json` avant déploiement (structure, dates, trajets, positions) |
-| `npm test` | Lance les 64 tests : règles métier, contributions, géolocalisation |
+| `npm test` | Lance les 90 tests : règles métier, contributions, géolocalisation, panier |
 | `npm run css` | Compile `src/styles.css` en `css/style.css` (Tailwind CSS v4, minifié) |
 | `npm run version` | Estampille `sw.js` avec l'empreinte des fichiers, pour forcer la mise à jour du cache |
 | `npm run publier` | Copie les fichiers livrés dans `public/`, le dossier servi en production |
@@ -76,10 +80,11 @@ zando-prix/
 ├── manifest.json         Manifeste PWA
 ├── sw.js                 Service worker : cache hors ligne, prix toujours redemandés au réseau
 ├── js/
-│   ├── app.js            Interface, routage (#/, #/produit/:id, #/carte, #/mes-prix, #/mon-marche, #/calcul)
+│   ├── app.js            Interface, routage (#/, #/produit/:id, #/carte, #/panier, #/mes-prix, #/mon-marche, #/calcul)
 │   ├── regles.js         Règles métier R4, R5, R6, R9 — sans DOM, testables seules
 │   ├── contributions.js  Prix proposés par l'utilisateur (R7, US-07, US-08)
 │   ├── geo.js            Position de l'appareil et marché le plus proche
+│   ├── panier.js         Panier : quantités, total par marché, économie nette du trajet
 │   ├── prefs.js          Point de départ mémorisé sur le téléphone
 │   └── carte.js          Carte Leaflet, chargée à la demande
 ├── data/
@@ -100,7 +105,7 @@ zando-prix/
 
 ## Règles métier
 
-Implémentées dans `js/regles.js` et `js/contributions.js`, couvertes par les tests de `outils/`.
+Implémentées dans `js/regles.js`, `js/contributions.js` et `js/panier.js`, couvertes par les tests de `outils/`.
 
 | Règle | Comportement |
 |---|---|
@@ -110,6 +115,7 @@ Implémentées dans `js/regles.js` et `js/contributions.js`, couvertes par les t
 | **R6** — fraîcheur | Moins de 7 jours : vert · 7 à 14 jours : orange « à vérifier » · au-delà : périmé, exclu des comparaisons |
 | **R7** — écart important | Une contribution à plus de 50 % du dernier relevé du même marché est signalée |
 | **R9** — dates | Toujours en jours écoulés (« hier », « il y a 3 jours »), jamais de date affichée |
+| **Panier** | Total = prix unitaire × quantité, à unité de référence identique. Seuls les marchés ayant un prix utilisable pour **tous** les produits sont classés ; « pas vu », instable et périmé écartent le marché. Le verdict applique R4 au panier entier : économie − aller-retour |
 
 ## Mettre à jour les prix
 
