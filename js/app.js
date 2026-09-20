@@ -1243,7 +1243,7 @@ function rendrePanier(vue) {
   const depart = departMarche();
 
   vue.innerHTML = `
-  <header class="bg-gradient-to-b from-vert-100 to-fond px-4 pb-5 ${HAUT} md:mx-auto md:mt-4 md:max-w-2xl md:rounded-hero md:px-6 md:pt-6">
+  <header class="bg-gradient-to-b from-vert-100 to-fond px-4 pb-5 ${HAUT} md:mx-auto md:mt-4 md:max-w-2xl md:rounded-hero md:px-6 md:pt-6 lg:max-w-5xl">
     <div class="flex items-center gap-3">
       <a href="#/" class="bouton-rond" aria-label="Retour">${ic('retour')}</a>
       <h1 class="flex-1 text-center text-[1.1rem] font-semibold tracking-tight">Mon panier</h1>
@@ -1252,10 +1252,15 @@ function rendrePanier(vue) {
     </div>
     <p id="resume-panier" class="mx-auto mt-4 max-w-[36ch] text-center text-[0.8rem] leading-relaxed text-gris"></p>
   </header>
-  <div class="space-y-6 px-4 pb-4 md:mx-auto md:max-w-2xl md:px-0">
-    ${blocDepartPanier(depart)}
-    ${choixProduits()}
-    <div id="resultats-panier" class="space-y-6"></div>
+  <div class="flex flex-col gap-6 px-4 pb-4 md:mx-auto md:max-w-2xl md:px-0 lg:grid lg:max-w-5xl lg:grid-cols-12 lg:items-start lg:gap-8">
+    <!-- Sur grand écran, le verdict tient la colonne de gauche et suit le défilement :
+         il se met à jour sous les yeux pendant qu'on choisit. Sur téléphone, il reste
+         après la liste — sinon il sortirait de l'écran au premier ajout. -->
+    <div id="resultats-panier" class="order-2 space-y-6 lg:sticky lg:top-24 lg:order-1 lg:col-span-5"></div>
+    <div class="order-1 space-y-6 lg:order-2 lg:col-span-7">
+      ${blocDepartPanier(depart)}
+      ${choixProduits()}
+    </div>
   </div>`;
 
   majResultats(depart);
