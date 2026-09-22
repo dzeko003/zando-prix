@@ -12,6 +12,8 @@
  * clair de la maquette. En production : fournisseur de tuiles avec clé — voir DEMANDES-AU-PM.md.
  */
 
+import { esc, ic, metres } from './html.js';
+
 let carte = null;
 let calqueMarches = null;
 let calqueUtilisateur = null;
@@ -19,10 +21,6 @@ let boutonPosition = null;
 let bornesMarches = null;
 let chargement = null;
 
-const echapper = s => String(s ?? '').replace(/[&<>"']/g, c =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const icone = (nom, cls = 'size-5') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${nom}"/></svg>`;
-export const metres = m => (m < 1000 ? `${Math.max(5, Math.round(m / 5) * 5)} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`);
 
 // Sur mobile, le bandeau de recherche recouvre le haut de la carte : on cadre en dessous.
 const marges = () => (matchMedia('(min-width: 64rem)').matches
@@ -43,8 +41,8 @@ function charger(type, url) {
 export function chargerLeaflet() {
   if (window.L) return Promise.resolve(window.L);
   chargement ??= Promise.all([
-    charger('css', 'vendor/leaflet/leaflet.css'),
-    charger('js', 'vendor/leaflet/leaflet.js')
+    charger('css', '/vendor/leaflet/leaflet.css'),
+    charger('js', '/vendor/leaflet/leaflet.js')
   ]).then(() => window.L).catch(err => { chargement = null; throw err; });
   return chargement;
 }
@@ -75,16 +73,16 @@ function ajouterControles(L, surPosition) {
       const bloc = L.DomUtil.create('div', 'flex flex-col items-end gap-2');
       bloc.innerHTML = `
         <button type="button" data-action="position" title="Afficher ma position" aria-label="Afficher ma position"
-                class="grid size-11 place-items-center rounded-full bg-vert-500 text-encre shadow-carte transition active:scale-95 disabled:opacity-60">${icone('viseur')}</button>
+                class="grid size-11 place-items-center rounded-full bg-vert-500 text-encre shadow-carte transition active:scale-95 disabled:opacity-60">${ic('viseur')}</button>
         <div class="flex flex-col overflow-hidden rounded-full bg-white shadow-carte ring-1 ring-black/5">
           <button type="button" data-action="plus" title="Zoomer" aria-label="Zoomer"
-                  class="grid size-11 place-items-center text-encre hover:bg-vert-50">${icone('plus')}</button>
+                  class="grid size-11 place-items-center text-encre hover:bg-vert-50">${ic('plus')}</button>
           <span class="mx-3 h-px bg-trait"></span>
           <button type="button" data-action="moins" title="Dézoomer" aria-label="Dézoomer"
-                  class="grid size-11 place-items-center text-encre hover:bg-vert-50">${icone('moins')}</button>
+                  class="grid size-11 place-items-center text-encre hover:bg-vert-50">${ic('moins')}</button>
         </div>
         <button type="button" data-action="marches" title="Voir les quatre marchés" aria-label="Voir les quatre marchés"
-                class="grid size-11 place-items-center rounded-full bg-white text-encre shadow-carte ring-1 ring-black/5 transition active:scale-95">${icone('marche')}</button>`;
+                class="grid size-11 place-items-center rounded-full bg-white text-encre shadow-carte ring-1 ring-black/5 transition active:scale-95">${ic('marche')}</button>`;
       L.DomEvent.disableClickPropagation(bloc);
       L.DomEvent.disableScrollPropagation(bloc);
       bloc.querySelector('[data-action=plus]').addEventListener('click', () => carte?.zoomIn());
@@ -125,14 +123,14 @@ export function epingles({ marches, lignes, badge, produit, format }) {
   for (const m of marches) {
     const l = lignes.find(x => x.marche.id === m.id);
     const moinsCher = badge === m.id;
-    const texte = echapper(!l || l.statut === 'pas_vu' ? 'pas vu'
+    const texte = esc(!l || l.statut === 'pas_vu' ? 'pas vu'
       : l.statut === 'instable' ? 'variable' : format(l.prix));
 
     // Vignette en arrière-plan plutôt qu'en <img> : leaflet.css force width:auto sur les images des marqueurs.
     const html = moinsCher
       ? `<div class="flex w-max -translate-x-1/2 -translate-y-full flex-col items-center">
           <div class="flex items-center gap-1.5 rounded-2xl bg-white p-0.5 pr-2 shadow-carte ring-2 ring-vert-500">
-            <span class="block size-7 rounded-xl bg-cover bg-center" style="background-image:url('images/produits/${echapper(produit.id)}-vignette.webp')"></span>
+            <span class="block size-7 rounded-xl bg-cover bg-center" style="background-image:url('/images/produits/${esc(produit.id)}-vignette.webp')"></span>
             <span class="whitespace-nowrap text-[0.74rem] font-bold tabular-nums text-encre">${texte}</span>
           </div>
           <span class="-mt-1 grid size-5 place-items-center rounded-full bg-vert-500 shadow"><span class="size-2 rounded-full bg-white"></span></span>
@@ -148,7 +146,7 @@ export function epingles({ marches, lignes, badge, produit, format }) {
       riseOnHover: true,
       zIndexOffset: moinsCher ? 500 : 0
     })
-      .bindPopup(`<b>${echapper(m.nom)}</b><br>${echapper(produit.nom)} : ${texte}` +
+      .bindPopup(`<b>${esc(m.nom)}</b><br>${esc(produit.nom)} : ${texte}` +
                  (moinsCher ? '<br><b>le moins cher relevé</b>' : ''), { offset: [0, moinsCher ? -48 : -34] })
       .addTo(calqueMarches);
   }

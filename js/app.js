@@ -1,49 +1,52 @@
 'use strict';
 
-import {
-  aujourdhui, evaluerProduit, chercher, fcfa, joursEcoules, libelleJours, coutTrajet
-} from './regles.js';
-import { valider, ajouter, pourProduit, lire as toutesLesContributions } from './contributions.js';
-import { departComplet, definirMarcheDepart, invitationFermee, fermerInvitation } from './prefs.js';
-import {
-  lire as lirePanier, definir as definirPanier, quantite as quantitePanier,
-  vider as viderPanier, compte as comptePanier, evaluerPanier
-} from './panier.js';
-import { localiser, marcheLePlusProche, distanceKm, distanceLisible, MESSAGES, etatPermission, consignesActivation } from './geo.js';
+/**
+ * Point d'entrée : charge les prix, puis affiche l'écran demandé par l'URL.
+ *
+ *   js/etat.js          données chargées, règles appliquées, point de départ
+ *   js/vues/*.js        un fichier par écran, chacun exporte rendreXxx(vue, param)
+ *   js/composants.js    morceaux d'interface partagés entre écrans
+ *   js/navigation.js    barres de navigation autour des écrans
+ *   js/position.js      géolocalisation côté interface
+ *   js/regles.js, panier.js, contributions.js, geo.js, prefs.js
+ *                       règles métier, sans DOM, couvertes par les tests d'outils/
+ */
 
-const metres = m => (m < 1000 ? `${Math.max(5, Math.round(m / 5) * 5)} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`);
-const coordonnees = p => `${p.lat.toFixed(5).replace('.', ',')} ; ${p.lon.toFixed(5).replace('.', ',')}`;
-const PRECISION_SUFFISANTE = 500;   // m — au-delà, on risque de se tromper de marché
+import { aujourdhui } from './regles.js';
+import { initialiser, produit } from './etat.js';
+import { $ } from './html.js';
+import { naviguer, marquerOnglet, majBarreDepart, majPastillePanier } from './navigation.js';
+import { rendreAccueil } from './vues/accueil.js';
+import { rendreProduit } from './vues/produit.js';
+import { rendreCarte, quitterCarte } from './vues/carte.js';
+import { rendrePanier } from './vues/panier.js';
+import { rendreMesPrix } from './vues/mes-prix.js';
+import { rendreCalcul } from './vues/calcul.js';
+import { rendreMonMarche } from './vues/mon-marche.js';
 
-const $ = (s, racine = document) => racine.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const nombre = n => new Intl.NumberFormat('fr-FR').format(n);
-const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-const ic = (nom, cls = 'size-5') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${nom}"/></svg>`;
-
-/* Grille du tableau des prix : la même pour l'en-tête et chaque ligne. */
-const GRILLE = 'grid grid-cols-[minmax(0,1fr)_repeat(4,2.55rem)] min-[400px]:grid-cols-[minmax(0,1fr)_repeat(4,3.35rem)] items-center gap-x-1 lg:grid-cols-[minmax(0,1fr)_repeat(4,5.5rem)] lg:gap-x-3';
-const HAUT = 'pt-[calc(env(safe-area-inset-top)+14px)]';
-
-let D = null;              // le fichier de prix
-let MAINTENANT = null;     // date de consultation (R9), décalable pour la recette
-let moduleCarte = null;    // Leaflet, chargé seulement à l'ouverture de la carte
-let positionSession = null; // dernière position obtenue, en mémoire le temps de la session, jamais enregistrée
-const EVALS = new Map();   // produit → règles appliquées
-const etat = { texte: '', filtre: 'tous', message: null };
-
-/* ------------------------------------------------------------------ départ */
+/*
+ * Écrans, par premier segment du chemin (/produit/riz-sac → 'produit', param 'riz-sac').
+ * `onglet` : l'onglet de navigation à surligner.
+ */
+const ROUTES = {
+  '':           { onglet: 'accueil',    rendre: rendreAccueil },
+  'produit':    { onglet: 'accueil',    rendre: (vue, id) => rendreProduit(vue, produit(id)) },
+  'carte':      { onglet: 'carte',      rendre: rendreCarte },
+  'panier':     { onglet: 'panier',     rendre: rendrePanier },
+  'mes-prix':   { onglet: 'mes-prix',   rendre: rendreMesPrix },
+  'mon-marche': { onglet: 'mon-marche', rendre: rendreMonMarche },
+  'calcul':     { onglet: 'calcul',     rendre: rendreCalcul }
+};
 
 async function demarrer() {
   const decalage = new URLSearchParams(location.search).get('date');
-  MAINTENANT = aujourdhui(decalage);
 
+  let fichier;
   try {
-    const r = await fetch('data/prix.json', { cache: 'no-cache' });
+    const r = await fetch('/data/prix.json', { cache: 'no-cache' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    D = await r.json();
-    if (!D.produits?.length) throw new Error('fichier vide');
+    fichier = await r.json();
+    if (!fichier.produits?.length) throw new Error('fichier vide');
   } catch (err) {
     // US-02 : jamais de page vide ou bloquée
     $('#chargement').hidden = true;
@@ -52,7 +55,7 @@ async function demarrer() {
     return;
   }
 
-  evaluerTout();
+  initialiser(fichier, aujourdhui(decalage));
   $('#chargement').hidden = true;
   $('#app').hidden = false;
   $('#nav').hidden = false;
@@ -66,335 +69,26 @@ async function demarrer() {
 
   addEventListener('online', etatReseau);
   addEventListener('offline', etatReseau);
-  addEventListener('hashchange', router);
+  addEventListener('popstate', router);
+  document.addEventListener('click', suivreLien);
   etatReseau();
   router();
-
-  if ('serviceWorker' in navigator) {
-    // Une nouvelle version prend la main : la page tourne encore avec l'ancien code, on recharge une fois.
-    // À la première visite il n'y avait pas de contrôleur : rien à rafraîchir.
-    const dejaControlee = !!navigator.serviceWorker.controller;
-    let rechargee = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!dejaControlee || rechargee) return;
-      rechargee = true;
-      location.reload();
-    });
-    navigator.serviceWorker.register('sw.js').catch(e => console.warn('[zando] sw :', e.message));
-  }
+  enregistrerServiceWorker();
 }
-
-function evaluerTout() {
-  const depart = departComplet()?.id ?? null;
-  EVALS.clear();
-  for (const p of D.produits) EVALS.set(p.id, evaluerProduit(p, D.marches, MAINTENANT, D.meta, depart));
-}
-
-function etatReseau() {
-  $('#hors-ligne').hidden = navigator.onLine !== false;
-}
-
-function departMarche() {
-  const d = departComplet();
-  const marche = d && D.marches.find(m => m.id === d.id);
-  return marche ? { ...d, marche } : null;
-}
-
-const vaut = p => { const e = EVALS.get(p.id).ecartUtile; return e.evaluable && e.vaut; };
-
-/* Les mots du marché, accordés : « au sac », « au tas », « à la mesure », « à la boîte ». */
-const FEMININS = new Set(['mesure', 'boîte', 'bouteille', 'boule', 'cuvette', 'botte']);
-const auUnite = mot => (FEMININS.has(mot) ? 'à la ' : 'au ') + mot;
-
-function joursCourt(j) {
-  if (j === null || j < 0) return 'date ?';
-  if (j > 14) return 'périmé';
-  if (j === 0) return 'auj.';
-  if (j === 1) return 'hier';
-  return `${j} j`;
-}
-
-/* Flèches des carrousels : visibles seulement avec une souris, et masquées quand le carrousel devient une grille. */
-function fleches(nom) {
-  return `<span class="hidden items-center gap-1.5 pointer-fine:flex lg:hidden!" data-fleches="${nom}">
-    <button type="button" data-sens="-1" class="bouton-rond size-9 disabled:opacity-35" aria-label="Précédent">${ic('chevron', 'size-4 rotate-180')}</button>
-    <button type="button" data-sens="1" class="bouton-rond size-9 disabled:opacity-35" aria-label="Suivant">${ic('chevron', 'size-4')}</button>
-  </span>`;
-}
-
-/**
- * Un carrousel horizontal doit se parcourir sans écran tactile : molette, glisser
- * à la souris, flèches. Au doigt, le défilement natif suffit et rien de ceci n'intervient.
- * Renvoie la fonction qui remet l'état des flèches à jour.
- */
-function activerDefilement(el, nom) {
-  if (!el) return () => {};
-  const boutons = [...document.querySelectorAll(`[data-fleches="${nom}"] button`)];
-  const deborde = () => el.scrollWidth > el.clientWidth + 1;
-  const maj = () => {
-    for (const b of boutons) {
-      const sens = Number(b.dataset.sens);
-      b.disabled = !deborde() || (sens < 0 ? el.scrollLeft <= 1 : el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
-    }
-  };
-
-  // Une flèche vise le début d'une carte, jamais une distance arbitraire : sinon
-  // l'aimantation ramène le carrousel là d'où il part. Positions bornées entre 0 et la butée.
-  const aller = sens => {
-    const max = el.scrollWidth - el.clientWidth;
-    const debut = el.getBoundingClientRect().left + (parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0);
-    const positions = [...el.children].map(c =>
-      Math.min(max, Math.max(0, Math.round(c.getBoundingClientRect().left - debut + el.scrollLeft))));
-    const ici = el.scrollLeft;
-    let cible;
-    if (sens > 0) {
-      const droite = el.getBoundingClientRect().right;
-      const i = [...el.children].findIndex(c => c.getBoundingClientRect().right > droite + 1);
-      cible = i < 0 ? max : positions[i];
-      if (cible <= ici + 1) cible = positions.find(x => x > ici + 1) ?? max;
-    } else {
-      const but = Math.max(0, ici - el.clientWidth / 2);
-      cible = [...positions].reverse().find(x => x <= but + 1) ?? 0;
-      if (cible >= ici - 1) cible = [...positions].reverse().find(x => x < ici - 1) ?? 0;
-    }
-    const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    el.scrollTo({ left: cible, behavior: reduit ? 'auto' : 'smooth' });
-    setTimeout(maj, 450);   // l'événement scroll n'est pas garanti : on remet les flèches à jour nous-mêmes
-  };
-  boutons.forEach(b => b.addEventListener('click', () => aller(Number(b.dataset.sens))));
-
-  // molette verticale → défilement horizontal ; en butée, la page reprend la main
-  el.addEventListener('wheel', e => {
-    if (!deborde() || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-    const avant = el.scrollLeft;
-    el.scrollLeft += e.deltaY;
-    if (el.scrollLeft !== avant) e.preventDefault();
-  }, { passive: false });
-
-  // glisser à la souris, sans déclencher le lien de la carte relâchée
-  let prise = null, glisse = false;
-  el.addEventListener('dragstart', e => e.preventDefault());
-  el.addEventListener('pointerdown', e => {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || !deborde()) return;
-    prise = { x: e.clientX, gauche: el.scrollLeft };
-    glisse = false;
-  });
-  el.addEventListener('pointermove', e => {
-    if (!prise) return;
-    const dx = e.clientX - prise.x;
-    if (!glisse && Math.abs(dx) < 6) return;
-    glisse = true;
-    el.style.scrollSnapType = 'none';
-    el.style.cursor = 'grabbing';
-    el.scrollLeft = prise.gauche - dx;
-  });
-  const lacher = () => {
-    if (!prise) return;
-    prise = null;
-    el.style.scrollSnapType = '';
-    el.style.cursor = '';
-  };
-  el.addEventListener('pointerup', lacher);
-  el.addEventListener('pointerleave', lacher);
-  el.addEventListener('click', e => {
-    if (glisse) { e.preventDefault(); e.stopPropagation(); glisse = false; }
-  }, true);
-
-  el.addEventListener('scroll', maj, { passive: true });
-  maj();
-  return maj;
-}
-
-function majBarre() {
-  const el = $('#barre-depart');
-  if (!el) return;
-  const d = departMarche();
-  el.textContent = d
-    ? `Depuis le ${d.marche.nom}${d.source === 'position' && d.km != null ? ' · ' + distanceLisible(d.km) : ''}`
-    : 'Choisir mon point de départ';
-}
-
-/* ------------------------------------------------- autorisation de la position */
-
-let dialogue = null;
-
-/**
- * Fenêtre d'explication autour de la demande de position.
- *   demande  — avant la demande du navigateur : pourquoi, et quoi répondre
- *   bloquee  — refus enregistré : une page web ne peut pas redemander, on montre où réactiver
- *   appareil — autorisée, mais l'appareil ne donne pas de position fiable
- * Résout `true` si l'utilisateur veut continuer ou réessayer.
- */
-function ouvrirDialogue(mode, precision = null) {
-  if (!dialogue) {
-    dialogue = document.createElement('dialog');
-    dialogue.className = 'm-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-hero bg-white p-0 text-encre ' +
-      'shadow-nav backdrop:bg-foret/55 sm:m-auto sm:max-w-md sm:rounded-hero';
-    document.body.append(dialogue);
-  }
-  const c = consignesActivation();
-  const etapes = liste => `<ol class="mt-4 space-y-3">${liste.map((texte, i) => `<li class="flex gap-3 text-[0.85rem] leading-snug">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-vert-100 text-[0.72rem] font-bold text-vert-700">${i + 1}</span>
-      <span>${esc(texte)}</span></li>`).join('')}</ol>`;
-  const vues = {
-    demande: {
-      icone: 'viseur', teinte: 'bg-vert-500 text-encre', titre: 'Autoriser votre position ?',
-      corps: `<p class="mt-2 text-[0.88rem] leading-relaxed text-gris">Zando Prix s’en sert pour trouver le marché le plus proche de vous
-          et vous situer sur la carte. Votre position reste sur votre téléphone : elle n’est ni enregistrée ni envoyée.</p>
-        <p class="mt-4 flex items-start gap-2 rounded-2xl bg-vert-50 p-3 text-[0.82rem] leading-snug text-vert-700">
-          ${ic('question', 'mt-0.5 size-4 shrink-0')} Votre navigateur va ensuite vous demander l’autorisation : choisissez « Autoriser ».</p>`,
-      principal: 'Continuer', secondaire: 'Pas maintenant'
-    },
-    bloquee: {
-      icone: 'alerte', teinte: 'bg-ocre-pale text-ocre', titre: 'La localisation est bloquée',
-      corps: `<p class="mt-2 text-[0.88rem] leading-relaxed text-gris">Elle a été refusée pour Zando Prix, et un site ne peut pas
-          la réactiver lui-même. Voici comment faire — ${esc(c.plateforme)} :</p>${etapes(c.site)}`,
-      principal: 'J’ai autorisé, réessayer', secondaire: 'Choisir mon marché moi-même'
-    },
-    appareil: {
-      icone: 'viseur', teinte: 'bg-ocre-pale text-ocre',
-      titre: precision ? `Position approximative, à ± ${metres(precision)}` : 'Position introuvable',
-      corps: `<p class="mt-2 text-[0.88rem] leading-relaxed text-gris">${precision
-          ? 'Votre appareil ne donne qu’une position estimée depuis le réseau, pas celle du GPS.'
-          : 'L’autorisation est donnée, mais votre appareil ne fournit pas de position.'} Activez sa localisation :</p>${etapes(c.systeme)}`,
-      principal: 'Réessayer', secondaire: 'Choisir mon marché moi-même'
-    }
-  };
-  const v = vues[mode];
-  dialogue.innerHTML = `<form method="dialog" class="p-6" data-mode="${mode}">
-      <div class="flex items-start justify-between gap-4">
-        <span class="grid size-12 shrink-0 place-items-center rounded-full ${v.teinte}">${ic(v.icone, 'size-6')}</span>
-        <button value="fermer" class="bouton-rond size-10" aria-label="Fermer">${ic('croix')}</button>
-      </div>
-      <h2 class="mt-4 text-[1.2rem] font-semibold leading-snug tracking-tight">${esc(v.titre)}</h2>
-      ${v.corps}
-      <div class="mt-6 grid gap-2.5">
-        <button value="principal" class="h-12 rounded-full bg-vert-500 text-[0.95rem] font-semibold text-encre">${esc(v.principal)}</button>
-        <button value="secondaire" class="h-12 rounded-full bg-nav text-[0.9rem] font-semibold text-encre">${esc(v.secondaire)}</button>
-      </div>
-    </form>`;
-  return new Promise(resoudre => {
-    dialogue.addEventListener('close', () => {
-      const choix = dialogue.returnValue;
-      if (choix === 'secondaire' && mode !== 'demande') location.hash = '#/mon-marche';
-      resoudre(choix === 'principal');
-    }, { once: true });
-    dialogue.returnValue = '';
-    dialogue.showModal();
-  });
-}
-
-/**
- * Demander la position comme une application : on explique d'abord, puis le navigateur affiche
- * sa propre demande. Refus ou appareil muet : la fenêtre montre quoi faire, et `gere` signale
- * à l'appelant qu'il n'a rien à afficher de plus.
- */
-async function obtenirPosition() {
-  const autorisation = await etatPermission();
-  if (autorisation === 'denied') {
-    if (await ouvrirDialogue('bloquee')) return obtenirPosition();
-    throw new Error('gere');
-  }
-  if (autorisation === 'prompt' && !(await ouvrirDialogue('demande'))) throw new Error('gere');
-  try {
-    return await localiser({ precis: true });
-  } catch (err) {
-    const mode = err.message === 'refus' ? 'bloquee' : (err.message === 'echec' || err.message === 'delai') ? 'appareil' : null;
-    if (!mode) throw err;
-    if (await ouvrirDialogue(mode)) return obtenirPosition();
-    throw new Error('gere');
-  }
-}
-
-/* Première visite : l'accueil invite à autoriser la position, sans jamais la demander d'office. */
-async function preparerInvitation() {
-  const el = $('#invitation-position');
-  if (!el || departMarche() || invitationFermee()) return;
-  const bloquee = (await etatPermission()) === 'denied';
-  if (!document.body.contains(el)) return;   // l'utilisateur a déjà changé d'écran
-  el.innerHTML = `<div class="carte flex flex-col gap-4 p-4 sm:flex-row sm:items-center lg:p-5">
-      <span class="grid size-12 shrink-0 place-items-center rounded-full bg-vert-500 text-encre">${ic('viseur', 'size-6')}</span>
-      <div class="min-w-0 flex-1">
-        <p class="text-[1rem] font-semibold leading-snug">Trouvez votre marché le plus proche</p>
-        <p class="mt-1 text-[0.82rem] leading-relaxed text-gris">${bloquee
-          ? 'La localisation est bloquée pour Zando Prix. Réactivez-la pour savoir si le déplacement vaut le coup depuis là où vous êtes.'
-          : 'Autorisez votre position : Zando Prix vous dira si le déplacement vaut le coup depuis là où vous êtes. Elle reste sur votre téléphone.'}</p>
-      </div>
-      <div class="flex flex-wrap items-center gap-2 sm:shrink-0">
-        <button type="button" data-invitation="autoriser" class="h-11 rounded-full bg-vert-500 px-5 text-[0.88rem] font-semibold text-encre disabled:opacity-60">${bloquee ? 'Voir comment la réactiver' : 'Autoriser ma position'}</button>
-        <a href="#/mon-marche" class="inline-flex h-11 items-center rounded-full bg-nav px-4 text-[0.84rem] font-semibold">Choisir moi-même</a>
-        <button type="button" data-invitation="fermer" class="grid size-11 place-items-center rounded-full text-gris hover:bg-nav" aria-label="Ne plus afficher">${ic('croix')}</button>
-      </div>
-    </div>`;
-  el.hidden = false;
-  el.querySelector('[data-invitation=fermer]').addEventListener('click', () => { fermerInvitation(); el.hidden = true; });
-  el.querySelector('[data-invitation=autoriser]').addEventListener('click', e => definirDepuisPosition(e.currentTarget));
-}
-
-/**
- * Déduit le marché de départ de la position de l'appareil, à la demande.
- * Partagé par l'invitation de l'accueil et par le panier : au-delà de ± 500 m,
- * on ne choisit pas à la place de l'utilisateur, on lui demande de confirmer.
- */
-async function definirDepuisPosition(bouton) {
-  bouton.disabled = true;
-  try {
-    const position = await obtenirPosition();
-    positionSession = position;
-    const proche = marcheLePlusProche(position, D.marches);
-    if (proche && position.precision <= PRECISION_SUFFISANTE) {
-      definirMarcheDepart(proche.marche.id, 'position', proche.km);
-      evaluerTout();
-      router();
-      return;
-    }
-    etat.messageDepart = proche
-      ? `Votre position n’est connue qu’à ± ${metres(position.precision)} : trop imprécis pour choisir à votre place. ` +
-        `Le plus proche serait le ${proche.marche.nom} — confirmez-le ci-dessous.`
-      : MESSAGES.loin;
-    location.hash = '#/mon-marche';
-  } catch (err) {
-    bouton.disabled = false;
-    if (err.message !== 'gere') { etat.messageDepart = MESSAGES[err.message] || MESSAGES.echec; location.hash = '#/mon-marche'; }
-  }
-}
-
-/* --------------------------------------------------------------- navigation */
 
 function router() {
-  moduleCarte?.detruire();
-  const [route, param] = decodeURIComponent(location.hash.replace(/^#\/?/, '')).split('/');
-  const vue = $('#vue');
+  quitterCarte();
+  if (redirigerAncienneAdresse()) return;
+  let [route, param] = decodeURIComponent(location.pathname).replace(/^\/+/, '').split('/');
 
-  // anciens liens « #charbon » : on les redirige
-  if (route && D.produits.some(p => p.id === route)) { location.replace('#/produit/' + route); return; }
+  // route inconnue, ou produit inexistant : accueil
+  if (!Object.hasOwn(ROUTES, route) || (route === 'produit' && !produit(param))) route = '';
 
-  let actif = 'accueil';
-  if (route === 'produit' && D.produits.some(p => p.id === param)) {
-    etat.message = null;
-    rendreProduit(vue, D.produits.find(p => p.id === param));
-  } else if (route === 'carte') {
-    actif = 'carte'; rendreCarte(vue, param);
-  } else if (route === 'panier') {
-    actif = 'panier'; rendrePanier(vue);
-  } else if (route === 'mes-prix') {
-    actif = 'mes-prix'; rendreMesPrix(vue);
-  } else if (route === 'mon-marche') {
-    actif = 'mon-marche'; rendreMonMarche(vue);
-  } else if (route === 'calcul') {
-    actif = 'calcul'; rendreCalcul(vue);
-  } else {
-    rendreAccueil(vue);
-  }
-
-  document.querySelectorAll('[data-nav] a[data-route]').forEach(a => {
-    const courant = a.dataset.route === actif;
-    a.classList.toggle('bg-vert-500', courant);
-    a.classList.toggle('bg-white', !courant);
-    if (courant) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
-  });
-  majBarre();
-  majPanierNav();
+  const { onglet, rendre } = ROUTES[route];
+  rendre($('#vue'), param);
+  marquerOnglet(onglet);
+  majBarreDepart();
+  majPastillePanier();
   window.scrollTo(0, 0);
 }
 
@@ -1478,130 +1172,33 @@ function rendreCalcul(vue) {
   </div>`;
 }
 
-/* --------------------------------------------------------------- mon marché */
-
-/* Le même produit, deux points de départ, deux réponses : l'exemple qui explique l'écran. */
-function exempleDepart() {
-  for (const p of D.produits) {
-    let oui = null, non = null;
-    for (const m of D.marches) {
-      const e = evaluerProduit(p, D.marches, MAINTENANT, D.meta, m.id).ecartUtile;
-      if (!e.evaluable || e.general || e.surPlace) continue;
-      if (e.vaut && !oui) oui = e;
-      if (!e.vaut && !non) non = e;
-    }
-    if (oui && non) return { p, oui, non };
-  }
-  return null;
+/* Un clic sur un lien vers un écran change l'adresse sans recharger la page. */
+function suivreLien(e) {
+  const a = e.target.closest('a[href]');
+  if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  if (a.target || a.origin !== location.origin) return;
+  const route = decodeURIComponent(a.pathname).split('/')[1];
+  if (!Object.hasOwn(ROUTES, route)) return;   // un fichier (image, PDF…) : le navigateur s'en charge
+  e.preventDefault();
+  if (a.pathname !== location.pathname) naviguer(a.pathname);   // déjà sur cet écran : rien à faire
 }
 
-function cadreExemple() {
-  const ex = exempleDepart();
-  if (!ex) return '';
-  const ligne = (e, vaut) => `<li class="flex items-start gap-3 rounded-2xl p-3 ${vaut ? 'bg-vert-50' : 'bg-fond'}">
-      <span class="grid size-8 shrink-0 place-items-center rounded-full ${vaut ? 'bg-vert-500 text-encre' : 'bg-nav text-encre'}">${ic(vaut ? 'aller' : 'maison', 'size-4')}</span>
-      <span class="text-[0.8rem] leading-snug">
-        <b class="block font-semibold">Depuis le ${esc(e.depuis.nom)} : ${vaut ? 'ça vaut le déplacement' : 'ça ne vaut pas le déplacement'}</b>
-        <span class="text-gris">${esc(fcfa(e.ecart))} d’écart avec le ${esc(e.marche.nom)}, pour ${esc(fcfa(e.seuil))} d’aller-retour.</span>
-      </span>
-    </li>`;
-  return `<div class="carte p-4">
-    <p class="flex items-center gap-2 text-[0.84rem] font-semibold">${ic('question', 'size-4 text-vert-600')} Pourquoi c’est important</p>
-    <p class="mt-1 text-[0.8rem] leading-relaxed text-gris">${esc(ex.p.nom)}, mêmes prix relevés — la réponse change selon d’où vous partez :</p>
-    <ul class="mt-3 space-y-2">${ligne(ex.oui, true)}${ligne(ex.non, false)}</ul>
-  </div>`;
+function etatReseau() {
+  $('#hors-ligne').hidden = navigator.onLine !== false;
 }
 
-function rendreMonMarche(vue) {
-  const depart = departMarche();
-  vue.innerHTML = `
-  <header class="bg-gradient-to-b from-vert-100 to-fond px-4 pb-2 ${HAUT} md:mx-auto md:mt-4 md:max-w-2xl md:rounded-hero md:px-6 md:pt-6">
-    <div class="flex items-center gap-3">
-      <a href="#/" class="bouton-rond" aria-label="Retour">${ic('retour')}</a>
-      <h1 class="flex-1 text-center text-[1.1rem] font-semibold tracking-tight">Point de départ</h1>
-      <span class="size-11 shrink-0"></span>
-    </div>
-  </header>
-  <div class="space-y-5 px-4 pt-4 md:mx-auto md:max-w-2xl md:px-0">
-    <div>
-      <p class="text-[1.5rem] font-semibold leading-tight tracking-tight">D’où partez-vous pour faire vos courses ?</p>
-      <p class="mt-2 text-[0.86rem] leading-relaxed text-gris">Choisissez le marché le plus proche de chez vous, ou celui où
-        vous allez d’habitude. Zando Prix s’en sert pour une seule chose : calculer si aller dans un autre marché vous fait
-        vraiment économiser, une fois le taxi aller-retour payé. Le choix reste sur ce téléphone.</p>
-    </div>
-    ${cadreExemple()}
-    <button id="ma-position" type="button"
-            class="flex h-13 w-full items-center justify-center gap-2 rounded-full bg-vert-500 text-[0.95rem] font-semibold text-encre transition active:scale-[0.98] disabled:bg-gris-clair">
-      ${ic('viseur')} Trouver le marché le plus proche de moi</button>
-    <p id="msg-position" class="rounded-2xl bg-ocre-pale px-3.5 py-2.5 text-[0.8rem] font-semibold leading-relaxed text-ocre" hidden></p>
-    <div>
-      <p class="mb-3 text-center text-[0.76rem] font-medium text-gris-clair">ou choisissez-le vous-même</p>
-      <div class="carte divide-y divide-trait px-3">
-        ${D.marches.map(m => {
-          const choisi = depart?.marche.id === m.id;
-          const repere = choisi && depart.source === 'position' && depart.km != null ? ' · repéré ' + distanceLisible(depart.km) : '';
-          return `<button type="button" data-marche="${esc(m.id)}" class="flex w-full items-center gap-3 py-3 text-left">
-            ${tuileMarche(m)}
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-[0.92rem] font-semibold">${esc(m.nom)}</span>
-              <span class="mt-0.5 flex items-center gap-1 text-[0.72rem] text-gris-clair">${ic('position', 'size-3.5 text-vert-500')} ${esc(m.arrondissement + repere)}</span>
-            </span>
-            ${choisi ? `<span class="pastille bg-vert-500 text-encre">${ic('coche', 'size-3.5')} Choisi</span>` : ic('chevron', 'size-5 text-gris-clair')}
-          </button>`;
-        }).join('')}
-      </div>
-    </div>
-    ${depart ? `<button id="oublier" type="button" class="w-full py-3 text-[0.84rem] font-semibold text-gris underline">Effacer mon choix</button>` : ''}
-  </div>`;
-
-  const choisir = (id, source = 'choix', km = null) => {
-    definirMarcheDepart(id, source, km);
-    evaluerTout();
-    location.hash = '#/';
-  };
-
-  vue.querySelectorAll('[data-marche]').forEach(b => b.addEventListener('click', () => choisir(b.dataset.marche)));
-  $('#oublier')?.addEventListener('click', () => { definirMarcheDepart(null); evaluerTout(); rendreMonMarche(vue); });
-
-  /* La position n'est jamais demandée au chargement : l'utilisateur la déclenche. */
-  $('#ma-position').addEventListener('click', async e => {
-    const bouton = e.currentTarget, initial = bouton.innerHTML, msg = $('#msg-position');
-    msg.hidden = true;
-    bouton.disabled = true;
-    bouton.textContent = 'Recherche de votre position précise…';
-    try {
-      const position = await obtenirPosition();
-      positionSession = position;
-      const proche = marcheLePlusProche(position, D.marches);
-      if (!proche) throw new Error('loin');
-      if (position.precision > PRECISION_SUFFISANTE) {
-        bouton.disabled = false;
-        bouton.innerHTML = initial;
-        msg.textContent = `Votre position (${coordonnees(position)}) n’est connue qu’à ± ${metres(position.precision)} : ` +
-          `trop imprécis pour choisir à votre place. Le plus proche serait le ${proche.marche.nom} — confirmez-le dans la liste ci-dessous.`;
-        const aide = Object.assign(document.createElement('button'), { type: 'button', className: 'ml-1 underline', textContent: 'Comment l’améliorer ?' });
-        aide.addEventListener('click', async () => { if (await ouvrirDialogue('appareil', position.precision)) $('#ma-position')?.click(); });
-        msg.append(' ', aide);
-        msg.hidden = false;
-        return;
-      }
-      choisir(proche.marche.id, 'position', proche.km);
-    } catch (err) {
-      bouton.disabled = false;
-      bouton.innerHTML = initial;
-      if (err.message === 'gere') return;
-      msg.textContent = MESSAGES[err.message] || MESSAGES.echec;
-      msg.hidden = false;
-    }
+function enregistrerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  // Une nouvelle version prend la main : la page tourne encore avec l'ancien code, on recharge une fois.
+  // À la première visite il n'y avait pas de contrôleur : rien à rafraîchir.
+  const dejaControlee = !!navigator.serviceWorker.controller;
+  let rechargee = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!dejaControlee || rechargee) return;
+    rechargee = true;
+    location.reload();
   });
-
-  // message laissé par la carte d'invitation de l'accueil
-  if (etat.messageDepart) {
-    const msg = $('#msg-position');
-    msg.textContent = etat.messageDepart;
-    msg.hidden = false;
-    etat.messageDepart = null;
-  }
+  navigator.serviceWorker.register('/sw.js').catch(e => console.warn('[zando] sw :', e.message));
 }
 
 demarrer();
