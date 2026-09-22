@@ -7,7 +7,7 @@
     "donnees": "node outils/generer-donnees.js",
     "valider": "node outils/valider.js data/prix.json",
     "test": "node outils/test-regles.js && node outils/test-contributions.js && node outils/test-geo.js && node outils/test-panier.js",
-    "start": "python3 -m http.server 8000",
+    "start": "node outils/serveur.js",
     "version": "node outils/version-sw.js",
     "publier": "node outils/publier.js",
     "build": "npm run donnees && npm run valider && npm test && npm run css && npm run version && npm run publier",

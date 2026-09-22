@@ -7,11 +7,11 @@
 <meta name="description" content="Ce qu'on annonce aujourd'hui sur les marchés Total, Poto-Poto, Moungali et Ouenzé, avant marchandage.">
 <meta name="theme-color" content="#F4F6F5">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icones/app-192.png" sizes="192x192">
-<link rel="apple-touch-icon" href="icones/app-192.png">
-<link rel="preload" href="fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icones/app-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/icones/app-192.png">
+<link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="min-h-dvh">
 
@@ -51,18 +51,18 @@
 <!-- Barre du haut, écrans larges : remplace la barre flottante du bas. -->
 <header id="barre" hidden class="sticky top-0 z-[1100] hidden bg-fond/85 backdrop-blur-md md:block">
   <div class="mx-auto flex h-18 max-w-6xl items-center gap-6 px-6 lg:px-10">
-    <a href="#/" class="flex shrink-0 items-center gap-2.5" aria-label="Zando Prix, accueil">
+    <a href="/" class="flex shrink-0 items-center gap-2.5" aria-label="Zando Prix, accueil">
       <span class="grid size-10 place-items-center rounded-full bg-foret text-vert-300"><svg class="ic size-5" aria-hidden="true"><use href="#i-logo"/></svg></span>
       <span class="text-[1.12rem] font-bold tracking-tight">Zando Prix</span>
     </a>
     <nav data-nav aria-label="Navigation principale" class="flex items-center gap-1.5 rounded-full bg-nav p-1.5 ring-1 ring-black/5">
-      <a href="#/" data-route="accueil" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-maison"/></svg>Accueil</a>
-      <a href="#/carte" data-route="carte" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-carte"/></svg>Carte</a>
-      <a href="#/panier" data-route="panier" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-panier"/></svg>Panier<span data-panier-compte hidden class="grid min-w-5 place-items-center rounded-full bg-encre px-1 text-[0.68rem] font-bold text-white"></span></a>
-      <a href="#/mes-prix" data-route="mes-prix" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-liste"/></svg>Mes prix</a>
-      <a href="#/mon-marche" data-route="mon-marche" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-marche"/></svg>Point de départ</a>
+      <a href="/" data-route="accueil" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-maison"/></svg>Accueil</a>
+      <a href="/carte" data-route="carte" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-carte"/></svg>Carte</a>
+      <a href="/panier" data-route="panier" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-panier"/></svg>Panier<span data-panier-compte hidden class="grid min-w-5 place-items-center rounded-full bg-encre px-1 text-[0.68rem] font-bold text-white"></span></a>
+      <a href="/mes-prix" data-route="mes-prix" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-liste"/></svg>Mes prix</a>
+      <a href="/mon-marche" data-route="mon-marche" class="flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[0.88rem] font-semibold transition"><svg class="ic size-[18px]" aria-hidden="true"><use href="#i-marche"/></svg>Point de départ</a>
     </nav>
-    <a href="#/mon-marche" class="ml-auto flex h-10 min-w-0 items-center gap-2 rounded-full bg-white px-4 text-[0.86rem] font-medium ring-1 ring-black/5">
+    <a href="/mon-marche" class="ml-auto flex h-10 min-w-0 items-center gap-2 rounded-full bg-white px-4 text-[0.86rem] font-medium ring-1 ring-black/5">
       <svg class="ic size-[18px] shrink-0 text-vert-600" aria-hidden="true"><use href="#i-position"/></svg><span id="barre-depart" class="truncate">Choisir mon point de départ</span></a>
   </div>
 </header>
@@ -87,19 +87,19 @@
 
 <nav id="nav" data-nav hidden aria-label="Navigation principale"
      class="md:hidden fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+12px)] z-[1100] mx-auto flex w-fit items-center gap-2 rounded-full bg-nav/95 p-2 shadow-nav ring-1 ring-black/5 backdrop-blur">
-  <a href="#/" data-route="accueil" aria-label="Accueil" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+  <a href="/" data-route="accueil" aria-label="Accueil" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
     <svg class="ic size-5" aria-hidden="true"><use href="#i-maison"/></svg></a>
-  <a href="#/carte" data-route="carte" aria-label="Carte des marchés" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+  <a href="/carte" data-route="carte" aria-label="Carte des marchés" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
     <svg class="ic size-5" aria-hidden="true"><use href="#i-carte"/></svg></a>
-  <a href="#/panier" data-route="panier" aria-label="Mon panier" class="relative grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+  <a href="/panier" data-route="panier" aria-label="Mon panier" class="relative grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
     <svg class="ic size-5" aria-hidden="true"><use href="#i-panier"/></svg>
     <span data-panier-compte hidden class="absolute right-0 top-0 grid min-w-[1.15rem] place-items-center rounded-full bg-encre px-1 text-[0.62rem] font-bold leading-[1.15rem] text-white"></span></a>
-  <a href="#/mes-prix" data-route="mes-prix" aria-label="Mes prix proposés" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+  <a href="/mes-prix" data-route="mes-prix" aria-label="Mes prix proposés" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
     <svg class="ic size-5" aria-hidden="true"><use href="#i-liste"/></svg></a>
-  <a href="#/mon-marche" data-route="mon-marche" aria-label="Mon point de départ" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
+  <a href="/mon-marche" data-route="mon-marche" aria-label="Mon point de départ" class="grid size-12 place-items-center rounded-full bg-white text-encre transition active:scale-95">
     <svg class="ic size-5" aria-hidden="true"><use href="#i-marche"/></svg></a>
 </nav>
 
-<script type="module" src="js/app.js"></script>
+<script type="module" src="/js/app.js"></script>
 </body>
 </html>

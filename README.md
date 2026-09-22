@@ -38,7 +38,7 @@ fonctionne sans réseau et reste légère (moins de 300 Ko au premier écran).
 
 ## Démarrage rapide
 
-Prérequis : **Node.js 22+** (testé avec 24) et **Python 3** pour le serveur local.
+Prérequis : **Node.js 22+** (testé avec 24). Python 3 ne sert qu'aux scripts d'images d'`outils/`.
 
 ```bash
 npm install        # Tailwind CSS (compilation) et Leaflet
@@ -52,7 +52,9 @@ ni `node_modules`) : c'est ce dossier qu'on publie.
 
 ### Déploiement sur Vercel
 
-Aucune configuration : Vercel lance `npm run build` et sert `public/`, son dossier par défaut.
+Vercel lance `npm run build` et sert `public/`, son dossier par défaut. `vercel.json` renvoie
+`index.html` pour toute adresse sans extension (`/carte`, `/produit/riz-sac`…) : c'est l'application
+qui affiche l'écran demandé. Les anciennes adresses à dièse (`/#/carte`) redirigent vers les nouvelles.
 Les prix étant datés au moment du build, **chaque déploiement remet les relevés au vert** ;
 sans nouveau déploiement, ils passent en orange au bout de 7 jours.
 
@@ -70,7 +72,7 @@ sans nouveau déploiement, ils passent en orange au bout de 7 jours.
 | `npm run version` | Estampille `sw.js` avec l'empreinte des fichiers, pour forcer la mise à jour du cache |
 | `npm run publier` | Copie les fichiers livrés dans `public/`, le dossier servi en production |
 | `npm run build` | Enchaîne tout ce qui précède ; s'arrête à la première erreur |
-| `npm start` | Serveur local sur le port 8000 |
+| `npm start` | Serveur local sur le port 8000 (`outils/serveur.js`, mêmes réécritures que `vercel.json`) ; il sert `sw.js` avec une version à jour, pour que le cache hors ligne ne ressorte jamais l'ancien code |
 
 ## Structure
 
@@ -80,13 +82,27 @@ zando-prix/
 ├── manifest.json         Manifeste PWA
 ├── sw.js                 Service worker : cache hors ligne, prix toujours redemandés au réseau
 ├── js/
-│   ├── app.js            Interface, routage (#/, #/produit/:id, #/carte, #/panier, #/mes-prix, #/mon-marche, #/calcul)
+│   ├── app.js            Point d'entrée : chargement des prix, table des routes (/carte, /produit/:id…)
+│   ├── vues/             Un fichier par écran, chacun exporte rendreXxx(vue, param)
+│   │   ├── accueil.js      /             tableau des prix, recherche, carrousel
+│   │   ├── produit.js      /produit/:id  verdict, prix par marché, proposer un prix
+│   │   ├── carte.js        /carte/:id    carte et cartes des marchés
+│   │   ├── panier.js       /panier
+│   │   ├── mes-prix.js     /mes-prix
+│   │   ├── mon-marche.js   /mon-marche   point de départ
+│   │   └── calcul.js       /calcul       « comment on calcule »
+│   ├── etat.js           Données chargées, règles appliquées à chaque produit, point de départ
+│   ├── composants.js     Morceaux d'interface partagés : en-tête, carte de verdict, vignettes…
+│   ├── navigation.js     naviguer('/carte') et barres de navigation autour des écrans
+│   ├── position.js       Géolocalisation côté interface : explications, autorisation, marché proche
+│   ├── carrousel.js      Carrousels horizontaux à la souris (molette, glisser, flèches)
+│   ├── html.js           Outils d'affichage : échappement, icônes, formats
 │   ├── regles.js         Règles métier R4, R5, R6, R9 — sans DOM, testables seules
 │   ├── contributions.js  Prix proposés par l'utilisateur (R7, US-07, US-08)
 │   ├── geo.js            Position de l'appareil et marché le plus proche
 │   ├── panier.js         Panier : quantités, total par marché, économie nette du trajet
 │   ├── prefs.js          Point de départ mémorisé sur le téléphone
-│   └── carte.js          Carte Leaflet, chargée à la demande
+│   └── carte.js          Carte Leaflet, chargée à la demande par vues/carte.js
 ├── data/
 │   ├── prix.json         Fichier servi en production
 │   ├── prix-demo.json    Jeu de recette : dates choisies pour exercer chaque cas des règles

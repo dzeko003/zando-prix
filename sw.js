@@ -9,7 +9,7 @@
  * Les fonds de carte, d'un autre domaine, ne passent pas par ce cache.
  */
 
-const VERSION = 'zando-25dabce3f7';
+const VERSION = 'zando-6cf5b67180';
 
 const PRODUITS = ['riz-sac', 'riz-detail', 'foufou', 'haricot', 'sucre', 'huile', 'oeufs',
                   'mpiodi-carton', 'mpiodi-detail', 'kwanga', 'saka-saka', 'charbon'];
@@ -17,7 +17,10 @@ const PRODUITS = ['riz-sac', 'riz-detail', 'foufou', 'haricot', 'sucre', 'huile'
 const COQUILLE = [
   './', 'index.html', 'manifest.json',
   'css/style.css',
-  'js/app.js', 'js/regles.js', 'js/contributions.js', 'js/prefs.js', 'js/geo.js', 'js/carte.js', 'js/panier.js',
+  // tout le code : modules de js/ (dont carte.js) et écrans de js/vues/
+  'js/app.js', 'js/etat.js', 'js/html.js', 'js/composants.js', 'js/navigation.js', 'js/carrousel.js', 'js/position.js',
+  'js/regles.js', 'js/contributions.js', 'js/prefs.js', 'js/geo.js', 'js/carte.js', 'js/panier.js',
+  ...['accueil', 'produit', 'carte', 'panier', 'mes-prix', 'calcul', 'mon-marche'].map(v => `js/vues/${v}.js`),
   'fonts/plus-jakarta-sans.woff2',
   'icones/app-192.png', 'icones/app-512.png',
   'images/marche-total.webp',

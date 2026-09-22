@@ -6,30 +6,48 @@
  * Sans ça, un navigateur continue de servir l'ancienne version après un déploiement.
  *
  *   node outils/version-sw.js      (lancé par npm run build)
+ *
+ * Le serveur de développement (outils/serveur.js) réutilise `estampiller` à chaque
+ * demande de sw.js : une modification du code est vue dès le rechargement suivant.
  */
 
 import fs from 'node:fs';
+import path from 'node:path';
 import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
-const SUIVIS = [
-  'index.html', 'manifest.json', 'css/style.css',
-  'js/app.js', 'js/regles.js', 'js/contributions.js', 'js/prefs.js', 'js/geo.js', 'js/carte.js', 'js/panier.js',
-  'fonts/plus-jakarta-sans.woff2',
-  'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
-  'images/marche-total.webp',
-  ...fs.readdirSync('images/produits').sort().map(f => `images/produits/${f}`),
-  ...fs.readdirSync('images/marches').sort().map(f => `images/marches/${f}`)
-];
+const RACINE = path.join(import.meta.dirname, '..');
+const lire = f => fs.readFileSync(path.join(RACINE, f));
+const lister = dossier => fs.readdirSync(path.join(RACINE, dossier), { recursive: true }).sort();
 
-const empreinte = crypto.createHash('sha256');
-for (const f of SUIVIS) empreinte.update(fs.readFileSync(f));
-const version = 'zando-' + empreinte.digest('hex').slice(0, 10);
+/** Empreinte des fichiers livrés : change dès qu'un seul d'entre eux change. */
+export function calculerVersion() {
+  const suivis = [
+    'index.html', 'manifest.json', 'css/style.css',
+    ...lister('js').filter(f => f.endsWith('.js')).map(f => `js/${f}`),
+    'fonts/plus-jakarta-sans.woff2',
+    'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
+    'images/marche-total.webp',
+    ...lister('images/produits').map(f => `images/produits/${f}`),
+    ...lister('images/marches').map(f => `images/marches/${f}`)
+  ];
+  const empreinte = crypto.createHash('sha256');
+  for (const f of suivis) empreinte.update(lire(f));
+  return 'zando-' + empreinte.digest('hex').slice(0, 10);
+}
 
-const sw = fs.readFileSync('sw.js', 'utf8');
-const avant = sw.match(/const VERSION = '([^']+)'/)[1];
-if (avant === version) {
-  console.log(`service worker inchangé (${version})`);
-} else {
-  fs.writeFileSync('sw.js', sw.replace(/const VERSION = '[^']+'/, `const VERSION = '${version}'`));
-  console.log(`service worker : ${avant} → ${version}`);
+/** Le texte de sw.js avec la version donnée. */
+export const estampiller = (sw, version = calculerVersion()) =>
+  sw.replace(/const VERSION = '[^']+'/, `const VERSION = '${version}'`);
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const version = calculerVersion();
+  const sw = lire('sw.js').toString('utf8');
+  const avant = sw.match(/const VERSION = '([^']+)'/)[1];
+  if (avant === version) {
+    console.log(`service worker inchangé (${version})`);
+  } else {
+    fs.writeFileSync(path.join(RACINE, 'sw.js'), estampiller(sw, version));
+    console.log(`service worker : ${avant} → ${version}`);
+  }
 }
