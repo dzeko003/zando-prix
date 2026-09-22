@@ -1,6 +1,6 @@
 {
   "meta": {
-    "genere_le": "2026-09-22",
+    "genere_le": "2026-09-20",
     "seuil_deplacement_fcfa": 2000,
     "trajets": {
       "moungali|ouenze": 2000,
@@ -74,25 +74,25 @@
           "statut": "releve",
           "prix": 22500,
           "mot_vendeuse": "sac",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 21500,
           "mot_vendeuse": "sac",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 19500,
           "mot_vendeuse": "sac",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 20000,
           "mot_vendeuse": "sac",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -112,25 +112,25 @@
           "statut": "releve",
           "prix": 500,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 500,
           "mot_vendeuse": "boîte",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 475,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 450,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -149,25 +149,25 @@
       "releves": {
         "total": {
           "statut": "pas_vu",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 400,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 375,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 400,
           "mot_vendeuse": "boîte",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -188,25 +188,25 @@
           "statut": "releve",
           "prix": 750,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 800,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 725,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 700,
           "mot_vendeuse": "mesure",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -227,25 +227,25 @@
           "statut": "releve",
           "prix": 1100,
           "mot_vendeuse": "paquet",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 1050,
           "mot_vendeuse": "paquet",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 1000,
           "mot_vendeuse": "paquet",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 1000,
           "mot_vendeuse": "paquet",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -265,25 +265,25 @@
           "statut": "releve",
           "prix": 1900,
           "mot_vendeuse": "bouteille",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 1850,
           "mot_vendeuse": "bouteille",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 1800,
           "mot_vendeuse": "bouteille",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 1750,
           "mot_vendeuse": "bouteille",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -303,25 +303,25 @@
           "statut": "releve",
           "prix": 3600,
           "mot_vendeuse": "plateau",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 3500,
           "mot_vendeuse": "plateau",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 3400,
           "mot_vendeuse": "plateau",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 3300,
           "mot_vendeuse": "plateau",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -341,25 +341,25 @@
           "statut": "releve",
           "prix": 32000,
           "mot_vendeuse": "carton",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 31000,
           "mot_vendeuse": "carton",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 29500,
           "mot_vendeuse": "carton",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 28500,
           "mot_vendeuse": "carton",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -379,25 +379,25 @@
           "statut": "releve",
           "prix": 1500,
           "mot_vendeuse": "tas",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 1500,
           "mot_vendeuse": "tas",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 1250,
           "mot_vendeuse": "tas",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 1250,
           "mot_vendeuse": "tas",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -418,25 +418,25 @@
           "statut": "releve",
           "prix": 700,
           "mot_vendeuse": "bâton",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 700,
           "mot_vendeuse": "bâton",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 600,
           "mot_vendeuse": "bâton",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "releve",
           "prix": 600,
           "mot_vendeuse": "bâton",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -458,23 +458,23 @@
           "statut": "releve",
           "prix": 400,
           "mot_vendeuse": "boule",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 350,
           "mot_vendeuse": "sachet",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 350,
           "mot_vendeuse": "boule",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "pas_vu",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     },
@@ -495,26 +495,26 @@
           "statut": "releve",
           "prix": 4000,
           "mot_vendeuse": "sac",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "poto-poto": {
           "statut": "releve",
           "prix": 3800,
           "mot_vendeuse": "sac",
-          "date": "2026-09-20"
+          "date": "2026-09-18"
         },
         "moungali": {
           "statut": "releve",
           "prix": 2900,
           "mot_vendeuse": "sac",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         },
         "ouenze": {
           "statut": "instable",
           "prix_min": 2500,
           "prix_max": 4200,
           "mot_vendeuse": "sac",
-          "date": "2026-09-21"
+          "date": "2026-09-19"
         }
       }
     }
