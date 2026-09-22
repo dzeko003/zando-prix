@@ -14,10 +14,11 @@ export const HAUT = 'pt-[calc(env(safe-area-inset-top)+14px)]';
 
 /**
  * En-tête des écrans secondaires : bouton retour, titre centré, action à droite.
- * `action` remplace la case vide qui équilibre le bouton retour.
+ * `action` remplace la case vide qui équilibre le bouton retour ; `classe` s'ajoute
+ * à l'en-tête (ex. une largeur plus grande sur grand écran).
  */
-export function enTetePage({ titre, action = '<span class="size-11 shrink-0"></span>', sousTitre = '' }) {
-  return `<header class="bg-gradient-to-b from-vert-100 to-fond px-4 ${sousTitre ? 'pb-5' : 'pb-2'} ${HAUT} md:mx-auto md:mt-4 md:max-w-2xl md:rounded-hero md:px-6 md:pt-6">
+export function enTetePage({ titre, action = '<span class="size-11 shrink-0"></span>', sousTitre = '', classe = '' }) {
+  return `<header class="bg-gradient-to-b from-vert-100 to-fond px-4 ${sousTitre ? 'pb-5' : 'pb-2'} ${HAUT} md:mx-auto md:mt-4 md:max-w-2xl md:rounded-hero md:px-6 md:pt-6 ${classe}">
     <div class="flex items-center gap-3">
       <a href="/" class="bouton-rond" aria-label="Retour">${ic('retour')}</a>
       <h1 class="flex-1 text-center text-[1.1rem] font-semibold tracking-tight">${titre}</h1>

@@ -25,12 +25,18 @@ export function rendrePanier(vue) {
     titre: 'Mon panier',
     action: `<button type="button" id="vider-panier" class="bouton-rond" aria-label="Vider le panier" ${plein ? '' : 'hidden'}>${ic('croix')}</button>
       <span class="size-11 shrink-0 ${plein ? 'hidden' : ''}"></span>`,
-    sousTitre: '<p id="resume-panier" class="mx-auto mt-4 max-w-[36ch] text-center text-[0.8rem] leading-relaxed text-gris"></p>'
+    sousTitre: '<p id="resume-panier" class="mx-auto mt-4 max-w-[36ch] text-center text-[0.8rem] leading-relaxed text-gris"></p>',
+    classe: 'lg:max-w-5xl'
   })}
-  <div class="space-y-6 px-4 pb-4 md:mx-auto md:max-w-2xl md:px-0">
-    ${blocDepart(depart)}
-    ${choixProduits()}
-    <div id="resultats-panier" class="space-y-6"></div>
+  <div class="flex flex-col gap-6 px-4 pb-4 md:mx-auto md:max-w-2xl md:px-0 lg:grid lg:max-w-5xl lg:grid-cols-12 lg:items-start lg:gap-8">
+    <!-- Sur grand écran, le verdict tient la colonne de gauche et suit le défilement :
+         il se met à jour sous les yeux pendant qu'on choisit. Sur téléphone, il reste
+         après la liste — sinon il sortirait de l'écran au premier ajout. -->
+    <div id="resultats-panier" class="order-2 space-y-6 lg:sticky lg:top-24 lg:order-1 lg:col-span-5"></div>
+    <div class="order-1 space-y-6 lg:order-2 lg:col-span-7">
+      ${blocDepart(depart)}
+      ${choixProduits()}
+    </div>
   </div>`;
 
   majResultats(depart);
