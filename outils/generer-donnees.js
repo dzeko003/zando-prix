@@ -4,9 +4,13 @@
 /**
  * Génère data/prix.json et data/prix-demo.json.
  *
- * Les dates ne sont JAMAIS écrites en dur : elles sont calculées par rapport
- * au jour où le script tourne. Relance-le le matin de la démo et tous les
- * relevés repassent au vert (règle R6), badge et écart utile compris.
+ * data/prix.json porte les dates RÉELLES des relevés terrain (DATES_RELEVES) :
+ * elles ne bougent pas d'un build à l'autre, les prix vieillissent donc
+ * normalement (vert → orange → périmé, règle R6). Après un nouveau relevé,
+ * mets à jour DATES_RELEVES et DATE_GENERATION.
+ *
+ * data/prix-demo.json reste calculé par rapport au jour où le script tourne,
+ * pour que la recette exerce toujours toutes les branches de R6 et R9.
  *
  *   node outils/generer-donnees.js
  */
@@ -53,7 +57,9 @@ const MARCHES = [
 const IDS = MARCHES.map(m => m.id);
 
 // Protocole : deux marchés par matinée, sur deux matinées consécutives.
-const MATINEES = { 'total': -2, 'poto-poto': -2, 'moungali': -1, 'ouenze': -1 };
+// Dates fixes du dernier relevé terrain — à modifier uniquement après un nouveau relevé.
+const DATES_RELEVES = { 'total': '2026-09-18', 'poto-poto': '2026-09-18', 'moungali': '2026-09-19', 'ouenze': '2026-09-19' };
+const DATE_GENERATION = '2026-09-20';
 
 function jour(decalage) {
   const d = new Date();
@@ -168,10 +174,12 @@ function releve(prod, marche, date) {
   return { statut: 'releve', prix: v, mot_vendeuse: mot(prod, marche), date };
 }
 
-function produit(prod, decalages, surcharges = {}) {
+/** `dates` donne, par marché, une date fixe « AAAA-MM-JJ » ou un décalage en jours. */
+function produit(prod, dates, surcharges = {}) {
   const releves = {};
   for (const id of IDS) {
-    const base = releve(prod, id, jour(decalages[id]));
+    const d = dates[id];
+    const base = releve(prod, id, typeof d === 'string' ? d : jour(d));
     releves[id] = Object.assign(base, (surcharges[id] || {}));
   }
   return {
@@ -187,7 +195,7 @@ function produit(prod, decalages, surcharges = {}) {
 
 function entete(extra) {
   return Object.assign({
-    genere_le: jour(0),
+    genere_le: DATE_GENERATION,
     seuil_deplacement_fcfa: SEUIL_DEPLACEMENT,
     trajets: TRAJETS,
     source_prix: 'provisoire — valeurs plausibles, à remplacer par les relevés terrain du PM',
@@ -196,12 +204,12 @@ function entete(extra) {
   }, extra);
 }
 
-/* ---------- fichier de production : tout vert ---------- */
+/* ---------- fichier de production : dates fixes du relevé terrain ---------- */
 
 const production = {
   meta: entete({}),
   marches: MARCHES,
-  produits: PRODUITS.map(p => produit(p, MATINEES))
+  produits: PRODUITS.map(p => produit(p, DATES_RELEVES))
 };
 
 /* ---------- fichier de recette : chaque branche de R6 et R9 ---------- */
@@ -226,6 +234,7 @@ const CAS_DEMO = {
 
 const demo = {
   meta: entete({
+    genere_le: jour(0),
     source_prix: 'jeu de recette — dates choisies pour exercer toutes les branches des règles R6 et R9',
     usage: 'recette et démonstration de la péremption ; ne jamais servir comme fichier de production'
   }),
@@ -240,5 +249,5 @@ fs.writeFileSync(path.join(DOSSIER, 'prix.json'), JSON.stringify(production, nul
 fs.writeFileSync(path.join(DOSSIER, 'prix-demo.json'), JSON.stringify(demo, null, 2) + '\n');
 
 const ko = f => (fs.statSync(path.join(DOSSIER, f)).size / 1024).toFixed(1);
-console.log(`prix.json       généré  (${ko('prix.json')} Ko)  — relevés datés d'hier et d'avant-hier`);
+console.log(`prix.json       généré  (${ko('prix.json')} Ko)  — relevés figés au ${DATES_RELEVES.total} / ${DATES_RELEVES.ouenze}`);
 console.log(`prix-demo.json  généré  (${ko('prix-demo.json')} Ko)  — dates étalées de +2 à -20 jours`);

@@ -1,20 +1,87 @@
-# Zando Prix
+<div align="center">
 
-**Les prix annoncés aujourd'hui sur quatre marchés de Brazzaville, avant marchandage.**
+# 🛒 Zando Prix
 
-Zando Prix compare les prix de 12 produits courants (riz, foufou, mpiodi, kwanga, makala…)
-sur le Marché Total, Poto-Poto, Moungali et Ouenzé. L'application dit où c'est le moins cher
-et, surtout, si l'écart **vaut le prix du taxi** depuis le marché où l'on se trouve.
+### Le bon prix, au bon marché — et seulement si le taxi en vaut la peine.
 
-C'est une application web progressive (PWA) : elle s'installe sur l'écran d'accueil,
-fonctionne sans réseau et reste légère (moins de 300 Ko au premier écran).
+**Comparez en un coup d'œil les prix annoncés sur quatre grands marchés de Brazzaville,
+et sachez tout de suite si traverser la ville vous fait vraiment économiser.**
+
+Marché Total · Poto-Poto · Moungali · Ouenzé
+
+`PWA installable` · `Fonctionne hors ligne` · `< 300 Ko au premier écran` · `Aucun compte` · `Aucune donnée envoyée`
+
+![Accueil de Zando Prix : 12 produits comparés sur 4 marchés](docs/captures/accueil.png)
+
+</div>
+
+---
+
+## Pourquoi Zando Prix ?
+
+Riz, foufou, mpiodi, kwanga, makala… Le même sac de riz peut coûter **3 000 F de moins**
+à l'autre bout de la ville. Mais l'aller-retour en taxi coûte lui aussi 2 000 à 3 000 F.
+Alors, est-ce que ça vaut le coup ?
+
+**Zando Prix fait le calcul à votre place.** Ce n'est pas une simple liste de prix : l'application
+retire le prix du taxi depuis *votre* marché et vous donne une réponse claire,
+**« ça vaut le déplacement »** ou **« restez où vous êtes »**.
+
+- 💰 **12 produits du quotidien** comparés sur **4 marchés**, avec le mot qu'emploie vraiment la vendeuse.
+- 🚕 **Un verdict honnête** : l'écart de prix est comparé au vrai coût de l'aller-retour.
+- 🧺 **Tout le panier d'un coup** : vos courses de la semaine, chiffrées marché par marché.
+- 🕒 **Des prix datés** : chaque relevé affiche son âge. Un prix trop vieux est mis de côté, jamais affiché comme s'il était neuf.
+- 📶 **Pensé pour Brazzaville** : léger, installable sur l'écran d'accueil, utilisable sans réseau.
+- 🔒 **Respect de la vie privée** : pas de compte, pas de pistage, votre position ne quitte jamais le téléphone.
+
+---
+
+## Visite guidée
+
+### 🏠 L'accueil : la réponse dès le premier coup d'œil
+
+Le titre dit tout de suite combien de produits valent le déplacement depuis votre marché.
+Le tableau compare les 12 produits sur les 4 marchés. Le moins cher est surligné en vert et
+chaque prix indique son âge (« 4 j »). La recherche reconnaît aussi les noms locaux :
+*loso*, *makala*, *mpondu*…
+
+### 🗺️ La carte : vos marchés, vos prix, votre position
+
+![Carte des marchés avec le prix du riz sur chaque épingle](docs/captures/carte.png)
+
+Choisissez un produit : chaque marché affiche son prix directement sur la carte.
+L'épingle verte marque le moins cher relevé. À côté, les fiches indiquent la distance
+et le prix de l'aller-retour en taxi.
+
+### 🧺 Le panier : vos courses, chiffrées marché par marché
+
+![Panier comparé sur les quatre marchés, avec le verdict](docs/captures/panier.png)
+
+Ajoutez vos produits et leurs quantités. Zando Prix additionne tout, classe les marchés
+du moins cher au plus cher, puis **retire le prix du taxi** pour donner son verdict.
+Ici : le panier coûte 350 F de moins à Ouenzé, mais le taxi coûte 3 000 F. **Restez au Marché Total.**
+
+### 📍 Le point de départ : la réponse change selon d'où vous partez
+
+![Choix du point de départ](docs/captures/point-de-depart.png)
+
+Pour les mêmes prix, la réponse n'est pas la même selon votre quartier. Choisissez votre
+marché à la main, ou laissez l'application trouver le plus proche. La position n'est
+demandée que si vous appuyez sur le bouton, jamais au chargement.
+
+### ✍️ Mes prix : vous avez vu un prix ? Notez-le
+
+![Écran Mes prix proposés](docs/captures/mes-prix.png)
+
+Vous êtes au marché et le prix a changé ? Proposez-le en deux gestes, sans compte.
+Votre contribution reste sur votre téléphone : elle ne se mélange jamais aux relevés officiels.
+
+---
 
 > ⚠ Les 48 prix du fichier de données sont **provisoires** : plausibles mais inventés,
 > en attente des relevés terrain. Voir `../DEMANDES-AU-PM.md`.
 
----
-
-## Fonctionnalités
+## Fonctionnalités en détail
 
 - **Tableau des prix** : 12 produits × 4 marchés, avec la fraîcheur de chaque relevé.
 - **Fiche produit** : prix par marché du moins cher au plus cher, unité de référence,
@@ -27,10 +94,9 @@ fonctionne sans réseau et reste légère (moins de 300 Ko au premier écran).
 - **Carte des marchés** en lecture seule (Leaflet + OpenStreetMap), chargée à la demande. Aucun itinéraire.
 - **Recherche tolérante** : accents, tirets, majuscules ignorés ; noms locaux reconnus
   (*loso*, *madesu*, *makala*, *pondu*…).
-- **Panier** : un écran liste les 12 produits **sans leurs prix** ; on choisit les quantités,
-  comptées en unités de référence (4 = quatre sacs de 25 kg). L'application classe alors les
-  marchés par total du panier et dit si le déplacement se rembourse, taxi déduit depuis le
-  point de départ. Un marché qui ne fournit pas tout le panier est écarté du classement.
+- **Panier** : on choisit les quantités, comptées en unités de référence (4 = quatre sacs de 25 kg).
+  L'application classe les marchés par total du panier et dit si le déplacement se rembourse,
+  taxi déduit depuis le point de départ. Un marché qui ne fournit pas tout le panier est écarté du classement.
 - **Mes prix** : l'utilisateur propose un prix vu sur place, sans compte. La contribution
   reste sur son téléphone et n'entre jamais dans les comparaisons.
 - **Comment on calcule** : un écran explique les règles avec les chiffres du fichier en cours.
@@ -55,8 +121,9 @@ ni `node_modules`) : c'est ce dossier qu'on publie.
 Vercel lance `npm run build` et sert `public/`, son dossier par défaut. `vercel.json` renvoie
 `index.html` pour toute adresse sans extension (`/carte`, `/produit/riz-sac`…) : c'est l'application
 qui affiche l'écran demandé. Les anciennes adresses à dièse (`/#/carte`) redirigent vers les nouvelles.
-Les prix étant datés au moment du build, **chaque déploiement remet les relevés au vert** ;
-sans nouveau déploiement, ils passent en orange au bout de 7 jours.
+Les dates des relevés sont **figées** dans `outils/generer-donnees.js` : un déploiement ne les
+rajeunit pas. Les prix vieillissent au fil des jours (vert, puis orange au bout de 7 jours, puis
+périmés au-delà de 14), exactement comme sur le terrain.
 
 > La géolocalisation et le service worker exigent **HTTPS** en production
 > (`localhost` est toléré en développement).
@@ -65,7 +132,7 @@ sans nouveau déploiement, ils passent en orange au bout de 7 jours.
 
 | Commande | Rôle |
 |---|---|
-| `npm run donnees` | Régénère `data/prix.json` et `data/prix-demo.json`, datés par rapport à aujourd'hui |
+| `npm run donnees` | Régénère `data/prix.json` (dates figées du relevé terrain) et `data/prix-demo.json` (dates relatives à aujourd'hui) |
 | `npm run valider` | Vérifie `data/prix.json` avant déploiement (structure, dates, trajets, positions) |
 | `npm test` | Lance les 90 tests : règles métier, contributions, géolocalisation, panier |
 | `npm run css` | Compile `src/styles.css` en `css/style.css` (Tailwind CSS v4, minifié) |
@@ -115,6 +182,7 @@ zando-prix/
 ├── fonts/                Plus Jakarta Sans + licence OFL
 ├── icones/               Icônes de l'application
 ├── vendor/leaflet/       Leaflet 1.9.4, hébergé avec l'application
+├── docs/captures/        Captures d'écran du README (non publiées)
 ├── outils/               Générateur de données, validateur, tests, publication, scripts d'images
 └── public/               Site publié (généré par npm run build, non versionné)
 ```
@@ -135,19 +203,21 @@ Implémentées dans `js/regles.js`, `js/contributions.js` et `js/panier.js`, cou
 
 ## Mettre à jour les prix
 
-Les prix et les trajets sont définis dans `outils/generer-donnees.js`. Les dates y sont
-**calculées par rapport au jour d'exécution**, jamais écrites en dur.
+Les prix, les trajets et les dates des relevés sont définis dans `outils/generer-donnees.js`.
+Les dates de production sont **fixes** : ce sont celles du passage sur le terrain.
 
 1. Reporter les relevés terrain dans `PRODUITS` (un nombre = prix relevé, `null` = pas vu ce jour,
    `[min, max]` = prix instable) et les prix d'aller-retour dans `TRAJETS`.
-2. Retirer la mention « provisoire » de `source_prix` une fois les vrais relevés saisis.
-3. Lancer `npm run build`. Le validateur refuse le déploiement en cas d'erreur
+2. Mettre à jour `DATES_RELEVES` (date du relevé, marché par marché) et `DATE_GENERATION`.
+3. Retirer la mention « provisoire » de `source_prix` une fois les vrais relevés saisis.
+4. Lancer `npm run build`. Le validateur refuse le déploiement en cas d'erreur
    (virgule oubliée, date future, fourchette incohérente…) et alerte si des prix ne sont plus verts.
 
 Le fichier `data/prix.json` peut aussi être édité à la main : lancer alors au minimum `npm run valider`.
 
-> **Avant une démo**, relancer `npm run donnees` le matin même : tous les relevés repassent au vert.
-> Des prix de plus de 7 jours éteignent le badge et l'écart utile.
+> **Avant une démo**, si les relevés ont plus de 7 jours, le badge et l'écart utile s'éteignent.
+> Pour montrer l'application « au vert », faire un nouveau relevé et mettre à jour `DATES_RELEVES`,
+> ou utiliser le paramètre `?date=` ci-dessous pour se placer à une autre date.
 
 ## Recette : simuler une autre date
 
