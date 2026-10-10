@@ -55,8 +55,9 @@ ni `node_modules`) : c'est ce dossier qu'on publie.
 Vercel lance `npm run build` et sert `public/`, son dossier par défaut. `vercel.json` renvoie
 `index.html` pour toute adresse sans extension (`/carte`, `/produit/riz-sac`…) : c'est l'application
 qui affiche l'écran demandé. Les anciennes adresses à dièse (`/#/carte`) redirigent vers les nouvelles.
-Les prix étant datés au moment du build, **chaque déploiement remet les relevés au vert** ;
-sans nouveau déploiement, ils passent en orange au bout de 7 jours.
+Tant que `meta.dates_glissantes` vaut `true` dans `data/prix.json` (données de démonstration),
+l'application décale les dates à l'affichage : le relevé le plus récent date toujours d'hier,
+et **les prix ne périment jamais**, même sans nouveau déploiement.
 
 > La géolocalisation et le service worker exigent **HTTPS** en production
 > (`localhost` est toléré en développement).
@@ -146,8 +147,9 @@ Les prix et les trajets sont définis dans `outils/generer-donnees.js`. Les date
 
 Le fichier `data/prix.json` peut aussi être édité à la main : lancer alors au minimum `npm run valider`.
 
-> **Avant une démo**, relancer `npm run donnees` le matin même : tous les relevés repassent au vert.
-> Des prix de plus de 7 jours éteignent le badge et l'écart utile.
+> **Démo client** : rien à faire. Avec les dates glissantes, les relevés restent au vert.
+> Quand les vrais relevés terrain sont saisis, passer `dates_glissantes` à `false` dans
+> `outils/generer-donnees.js` : les prix vieillissent alors normalement (orange à 7 jours, périmés après 14).
 
 ## Recette : simuler une autre date
 

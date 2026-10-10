@@ -11,6 +11,7 @@
  */
 
 import fs from 'node:fs';
+import { faireGlisserDates } from '../js/regles.js';
 
 const fichier = process.argv[2] || 'data/prix.json';
 const recette = process.argv.includes('--recette');
@@ -23,6 +24,9 @@ const a = m => alertes.push(m);
 let d;
 try {
   d = JSON.parse(fs.readFileSync(fichier, 'utf8'));
+  // Même traitement que l'application : en dates glissantes, le plus récent date d'hier.
+  const midi = new Date(); midi.setHours(12, 0, 0, 0);
+  d = faireGlisserDates(d, midi);
 } catch (err) {
   console.error(`✗ ${fichier} illisible : ${err.message}`);
   process.exit(1);
@@ -56,6 +60,8 @@ for (const [cle, v] of Object.entries(d.meta?.trajets || {})) {
   if ([a, b].sort().join('|') !== cle) e(`meta.trajets « ${cle} » : les marchés doivent être en ordre alphabétique`);
   if (!entier(v)) e(`meta.trajets « ${cle} » : montant invalide`);
 }
+if (d.meta?.dates_glissantes)
+  a('dates glissantes activées — les prix ne vieillissent pas ; passer meta.dates_glissantes à false avec les vrais relevés');
 if (/provisoire/i.test(d.meta?.source_prix || ''))
   a('les prix sont marqués « provisoire » — à remplacer par les relevés terrain');
 

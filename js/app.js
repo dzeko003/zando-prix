@@ -12,7 +12,7 @@
  *                       règles métier, sans DOM, couvertes par les tests d'outils/
  */
 
-import { aujourdhui } from './regles.js';
+import { aujourdhui, faireGlisserDates } from './regles.js';
 import { initialiser, produit } from './etat.js';
 import { $ } from './html.js';
 import { naviguer, marquerOnglet, majBarreDepart, majPastillePanier } from './navigation.js';
@@ -55,7 +55,7 @@ async function demarrer() {
     return;
   }
 
-  initialiser(fichier, aujourdhui(decalage));
+  initialiser(faireGlisserDates(fichier, aujourdhui()), aujourdhui(decalage));
   $('#chargement').hidden = true;
   $('#app').hidden = false;
   $('#nav').hidden = false;

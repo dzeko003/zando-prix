@@ -199,7 +199,10 @@ function entete(extra) {
 /* ---------- fichier de production : tout vert ---------- */
 
 const production = {
-  meta: entete({}),
+  // Données de démonstration : l'application décale les dates pour que le relevé
+  // le plus récent date toujours d'hier (js/regles.js, faireGlisserDates).
+  // Passer à false dès que les vrais relevés terrain sont saisis.
+  meta: entete({ dates_glissantes: true }),
   marches: MARCHES,
   produits: PRODUITS.map(p => produit(p, MATINEES))
 };
