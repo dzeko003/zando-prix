@@ -38,7 +38,12 @@ retire le prix du taxi depuis *votre* marché et vous donne une réponse claire,
 
 ## Visite guidée
 
-### L'accueil : la réponse dès le premier coup d'œil
+Vercel lance `npm run build` et sert `public/`, son dossier par défaut. `vercel.json` renvoie
+`index.html` pour toute adresse sans extension (`/carte`, `/produit/riz-sac`…) : c'est l'application
+qui affiche l'écran demandé. Les anciennes adresses à dièse (`/#/carte`) redirigent vers les nouvelles.
+Tant que `meta.dates_glissantes` vaut `true` dans `data/prix.json` (données de démonstration),
+l'application décale les dates à l'affichage : le relevé le plus récent date toujours d'hier,
+et **les prix ne périment jamais**, même sans nouveau déploiement.
 
 Le titre dit tout de suite combien de produits valent le déplacement depuis votre marché.
 Le tableau compare les 12 produits sur les 4 marchés. Le moins cher est surligné en vert et
@@ -73,8 +78,9 @@ demandée que si vous appuyez sur le bouton, jamais au chargement.
 
 ![Écran Mes prix proposés](docs/captures/mes-prix.png)
 
-Vous êtes au marché et le prix a changé ? Proposez-le en deux gestes, sans compte.
-Votre contribution reste sur votre téléphone : elle ne se mélange jamais aux relevés officiels.
+> **Démo client** : rien à faire. Avec les dates glissantes, les relevés restent au vert.
+> Quand les vrais relevés terrain sont saisis, passer `dates_glissantes` à `false` dans
+> `outils/generer-donnees.js` : les prix vieillissent alors normalement (orange à 7 jours, périmés après 14).
 
 ---
 

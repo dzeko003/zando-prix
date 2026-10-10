@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
   aujourdhui, joursEcoules, fraicheur, libelleJours,
-  evaluerProduit, chercher, normaliser, coutTrajet
+  evaluerProduit, chercher, normaliser, coutTrajet, faireGlisserDates
 } from '../js/regles.js';
 
 const d = JSON.parse(fs.readFileSync('data/prix-demo.json', 'utf8'));
@@ -128,6 +128,35 @@ test('espaces, tirets, majuscules et accents ignorés', () => {
 });
 test('aucune correspondance approximative', () => {
   assert.equal(chercher(d.produits, 'zzz').length, 0);
+});
+
+console.log('\nDates glissantes — données de démonstration');
+const vieux = {
+  meta: { dates_glissantes: true },
+  produits: [{ id: 'x', releves: {
+    a: { statut: 'releve', prix: 1, date: '2026-01-10' },
+    b: { statut: 'releve', prix: 2, date: '2026-01-08' },
+    c: { statut: 'pas_vu', date: null }
+  } }]
+};
+const midi = new Date('2026-10-10T12:00:00');
+test('le relevé le plus récent date d\'hier', () => {
+  const r = faireGlisserDates(vieux, midi).produits[0].releves;
+  assert.equal(r.a.date, '2026-10-09');
+});
+test('l\'écart entre relevés est conservé', () => {
+  assert.equal(faireGlisserDates(vieux, midi).produits[0].releves.b.date, '2026-10-07');
+});
+test('une case sans date reste sans date', () => {
+  assert.equal(faireGlisserDates(vieux, midi).produits[0].releves.c.date, null);
+});
+test('sans le drapeau, les dates ne bougent pas', () => {
+  const reel = { ...vieux, meta: {} };
+  assert.equal(faireGlisserDates(reel, midi), reel);
+});
+test('le fichier d\'origine n\'est pas modifié', () => {
+  faireGlisserDates(vieux, midi);
+  assert.equal(vieux.produits[0].releves.a.date, '2026-01-10');
 });
 
 console.log(`\n✓ ${n} tests passés\n`);

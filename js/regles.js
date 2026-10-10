@@ -27,6 +27,38 @@ export function aujourdhui(decalage) {
   return d;
 }
 
+/**
+ * Dates glissantes — pour les données de démonstration (`meta.dates_glissantes`).
+ * Décale tous les relevés d'un même nombre de jours pour que le plus récent
+ * date d'hier : les écarts entre marchés sont conservés et les prix ne périment
+ * jamais. Renvoie le fichier inchangé quand le drapeau est absent.
+ * `maintenant` est le vrai jour, pas la date décalée par ?date= : la recette
+ * de la péremption reste possible.
+ */
+export function faireGlisserDates(fichier, maintenant) {
+  if (!fichier?.meta?.dates_glissantes) return fichier;
+  const toutes = fichier.produits.flatMap(p => Object.values(p.releves).map(r => r.date).filter(Boolean));
+  if (!toutes.length) return fichier;
+  const plusRecente = toutes.reduce((a, b) => (a > b ? a : b));
+  const decalage = joursEcoules(plusRecente, maintenant) - 1;
+  if (!decalage) return fichier;
+
+  const p2 = n => String(n).padStart(2, '0');
+  const glisser = date => {
+    const d = new Date(date + 'T12:00:00');
+    d.setDate(d.getDate() + decalage);
+    return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+  };
+  return {
+    ...fichier,
+    produits: fichier.produits.map(p => ({
+      ...p,
+      releves: Object.fromEntries(Object.entries(p.releves).map(
+        ([id, r]) => [id, r.date ? { ...r, date: glisser(r.date) } : r]))
+    }))
+  };
+}
+
 export function joursEcoules(date, maintenant) {
   const d = new Date(date + 'T12:00:00');
   if (isNaN(d)) return null;
