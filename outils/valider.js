@@ -122,7 +122,7 @@ console.log(`  fraîcheur    ${fraicheur.vert} vert · ${fraicheur.orange} orang
 console.log(`  seuil R4     ${d.meta?.seuil_deplacement_fcfa} F`);
 
 if (!recette && fraicheur.orange + fraicheur.perime > 0)
-  a(`${fraicheur.orange + fraicheur.perime} prix ne sont plus verts — relance le générateur avant la démo, sinon ni badge ni écart utile`);
+  a(`${fraicheur.orange + fraicheur.perime} prix ne sont plus verts — nouveau relevé terrain à faire (puis mettre à jour DATES_RELEVES dans outils/generer-donnees.js)`);
 
 for (const m of alertes) console.log(`  ⚠ ${m}`);
 for (const m of erreurs) console.log(`  ✗ ${m}`);
